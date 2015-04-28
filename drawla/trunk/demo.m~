@@ -1,0 +1,15 @@
+load('queen.mat');
+% [Q,R] = qr(rand(3));
+% vertex = (Q*vertex')';
+% Plot the 3D model:
+figure(1); clf; drawMesh(vertex, face, 'wire');
+axis on; box on;
+[U,S,V] = svd(vertex, 0);
+view(3);
+% Draw the principle axes
+% drawSpan(V(:,1), '2r'); 
+% drawSpan(V(:,2), '2r'); drawSpan(V(:,3), '2r');
+
+hold on
+% drawPlane(V(:,1), 'b');
+% drawPlane(V(:,2), 500, 'b');
