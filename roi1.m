@@ -3,12 +3,13 @@ classdef roi1 < handle
     %   Detailed explanation goes here
     
     properties
-        rng        % ROI x-axis range
-        lineStyle
-        lineWidth
-        on          % binary state indicator: 0 - ROI is off, 1 - ROI is on.
-        dispFun     % handle of the display function, returning an info string. 
-                    % Default, @(rng) ['ROI: [' num2str(rng(:)', '%5.2f ') ']' ]
+        rng                 % 2-vector specifying the [from to] range of the ROI.
+        lineStyle           % string, specifies the color and style of the vertical lines.
+        lineWidth           % scalar, defines the width of the vertical lines.
+        on                  % binary state indicator: 0 - ROI is off, 1 - ROI is on.
+        displayFcn          % handle of the display function, returning an info string: str = f(rng).
+                            % Default: @(rng) ['ROI: [' num2str(rng(:)', '%5.2f ') ']' ].
+        displayPosition    % 4-vector of [left top height width] parameters of the display box. Default: [.7 .85 .1 .1]
     end
     
     properties(Hidden = true)
@@ -43,8 +44,9 @@ classdef roi1 < handle
                                               'tooltipstring', 'ROI',...
                                               'Separator', 'on');
             % Defaults:
-            r1.lineStyle = 'g--';
+            r1.lineStyle = 'k--';
             r1.lineWidth = 3;
+            r1.displayPosition = [.7 .85 .1 .1];
             xlims = get(gca,'xlim')';
             if nargin == 0
                 r1.rng = xlims(1) + diff(xlims)*[1; 2]./3;
@@ -53,7 +55,7 @@ classdef roi1 < handle
             end
             r1.lineIx = 0;
             r1.on = 0;
-            r1.dispFun = @(rng) ['ROI: [' num2str(rng(:)', '%5.2f ') ']  (' num2str(diff(rng), '%5.2f)') ];
+            r1.displayFcn = @(rng) ['ROI: [' num2str(rng(:)', '%5.2f ') ']  (' num2str(diff(rng), '%5.2f)') ];
         end
         
         %% Destructor
@@ -67,7 +69,7 @@ classdef roi1 < handle
         end
         
         %% ROI on callback
-        function roiOn(r1,src,evt)
+        function roiOn(r1,~,~)
             % Plot ROI lines:
             r1.old_NextPlot = get(gca,'NextPlot');
             hold on;
@@ -89,7 +91,7 @@ classdef roi1 < handle
             set(r1.hline([1 2]), 'buttonDownFcn', @(src,evt) roi1_bdcb(r1,src,evt));
             
             % Display the info box:
-            r1.hinfobx = annotation('textbox', [.65 .85 .1 .1],...
+            r1.hinfobx = annotation('textbox', r1.displayPosition,...
                             'String', r1.infoString(),...
                             'BackgroundColor', 'g',...
                             'FontSize', 12, ...
@@ -102,7 +104,7 @@ classdef roi1 < handle
         end
         
         %% ROI off callback
-        function roiOff(r1,src,evt)
+        function roiOff(r1,~,~)
             
             % Update the roi state:
             r1.on = 0;
@@ -113,7 +115,7 @@ classdef roi1 < handle
         end
         
         %% Interactions: button down callback
-        function roi1_bdcb(r1,src,evt)
+        function roi1_bdcb(r1,src,~)
             r1.lineIx = find(src == r1.hline);
             
             % Store the current window motion function:
@@ -125,7 +127,7 @@ classdef roi1 < handle
         end
         
         %% Interactions: window button motion callback
-        function roi1_wbmcb(r1,src,evt)
+        function roi1_wbmcb(r1,~,~)
             if r1.lineIx
                 cpos = get(gca, 'currentPoint');
                 r1.rng(r1.lineIx) = cpos(1,1);
@@ -137,7 +139,7 @@ classdef roi1 < handle
         end
         
         %% Interactions: window button up callback
-        function roi1_wbucb(r1,src,evt)
+        function roi1_wbucb(r1,~,~)
             r1.lineIx = 0;
             set(r1.hfig, 'windowButtonMotionFcn', r1.old_bmcb);
             set(r1.hfig, 'windowButtonUpFcn', r1.old_bucb);
@@ -150,9 +152,9 @@ classdef roi1 < handle
             if ~r1.on, return; end
                 
             % Background:
-            ylims = get(r1.hax, 'ylim');
-            set(r1.hbg, 'xdata', linspace(r1.rng(1), r1.rng(2), r1.nbg), ...
-                           'ydata', linspace(ylims(1), ylims(2), r1.nbg) );
+%             ylims = get(r1.hax, 'ylim');
+%             set(r1.hbg, 'xdata', linspace(r1.rng(1), r1.rng(2), r1.nbg), ...
+%                            'ydata', linspace(ylims(1), ylims(2), r1.nbg) );
                        
             % Lines:
             set(r1.hline(1), 'xdata', [1 1]*r1.rng(1), 'ydata', ylims);
@@ -165,7 +167,7 @@ classdef roi1 < handle
         %% Construct infobox string
         function s = infoString(r1)
 %             s = ['ROI: [' num2str(r1.rng', '%5.2f ') ']' ];
-            s = r1.dispFun(r1.rng);
+            s = r1.displayFcn(r1.rng);
         end
     end 
 end
