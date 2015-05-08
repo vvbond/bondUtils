@@ -5,6 +5,7 @@ classdef roi1 < handle
     properties
         rng                 % 2-vector specifying the [from to] range of the ROI.
         lineStyle           % string, specifies the color and style of the vertical lines.
+        lineColor           % color of the two side lines.
         lineWidth           % scalar, defines the width of the vertical lines.
         on                  % binary state indicator: 0 - ROI is off, 1 - ROI is on.
         displayFcn          % handle of the display function, returning an info string: str = f(rng).
@@ -44,9 +45,10 @@ classdef roi1 < handle
                                               'tooltipstring', 'ROI',...
                                               'Separator', 'on');
             % Defaults:
-            r1.lineStyle = 'k--';
-            r1.lineWidth = 3;
-            r1.displayPosition = [.7 .85 .1 .1];
+            r1.lineStyle = '-';
+            r1.lineColor = [.5 .5 .5];
+            r1.lineWidth = 2;
+            r1.displayPosition = [.65 .85 .1 .1];
             xlims = get(gca,'xlim')';
             if nargin == 0
                 r1.rng = xlims(1) + diff(xlims)*[1; 2]./3;
@@ -70,18 +72,20 @@ classdef roi1 < handle
         
         %% ROI on callback
         function roiOn(r1,~,~)
+            
             % Plot ROI lines:
             r1.old_NextPlot = get(gca,'NextPlot');
             hold on;
             
+            % Turn off other interactive tools:
             zoom off, pan off, datacursormode off
 
             % Plot ROI lines:
-            ylims = ylim;
-            r1.hline = [ plot([1 1]*r1.rng(1), ylims, r1.lineStyle, 'lineWidth', r1.lineWidth); 
-                            plot([1 1]*r1.rng(2), ylims, r1.lineStyle, 'lineWidth', r1.lineWidth);
-                            plot(r1.rng, [1 1]*ylims(2), 'g-', 'lineWidth', 10);
-                           ];
+            ylims = get(r1.hax, 'ylim');
+            r1.hline = [ plot([1 1]*r1.rng(1), ylims, r1.lineStyle, 'lineWidth', r1.lineWidth, 'color', r1.lineColor); 
+                         plot([1 1]*r1.rng(2), ylims, r1.lineStyle, 'lineWidth', r1.lineWidth, 'color', r1.lineColor);
+%                          plot(r1.rng, [1 1]*ylims(2), 'g-', 'lineWidth', 10);
+                       ];
             ylim(ylims);            
             
             % Restore the hold status:
@@ -93,9 +97,9 @@ classdef roi1 < handle
             % Display the info box:
             r1.hinfobx = annotation('textbox', r1.displayPosition,...
                             'String', r1.infoString(),...
-                            'BackgroundColor', 'g',...
                             'FontSize', 12, ...
                             'FontWeight', 'bold',...
+                            'BackgroundColor', [.9 .9 .9],...
                             'Tag', 'roi1.info' ...
                           );
                       
@@ -133,7 +137,7 @@ classdef roi1 < handle
                 r1.rng(r1.lineIx) = cpos(1,1);
                 % Update plot:
                 set(r1.hline(r1.lineIx), 'xdata', [1 1]*r1.rng(r1.lineIx));
-                set(r1.hline(3), 'xdata', r1.rng);
+%                 set(r1.hline(3), 'xdata', r1.rng);
                 set(r1.hinfobx, 'String', r1.infoString() );
             end
         end
@@ -150,15 +154,12 @@ classdef roi1 < handle
             
             % If ROI is not enabled, quit:
             if ~r1.on, return; end
-                
-            % Background:
-%             ylims = get(r1.hax, 'ylim');
-%             set(r1.hbg, 'xdata', linspace(r1.rng(1), r1.rng(2), r1.nbg), ...
-%                            'ydata', linspace(ylims(1), ylims(2), r1.nbg) );
-                       
+            
+            ylims = get(r1.hax, 'ylim');
             % Lines:
             set(r1.hline(1), 'xdata', [1 1]*r1.rng(1), 'ydata', ylims);
             set(r1.hline(2), 'xdata', [1 1]*r1.rng(2), 'ydata', ylims);
+%             set(r1.hline(3), 'xdata', r1.rng, 'ydata', [1 1]*ylims(2));
             
             % Info box:
             set(r1.hinfobx, 'String', r1.infoString);

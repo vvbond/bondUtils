@@ -11,6 +11,7 @@ classdef roi2 < handle
         x2y         % 2-vector of coefficients, [a; b], of the equation y(x) = a*x+b.
         y2x         % 2-vector of coefficients, [c; d], of the equation x(y) = c*y+d.
         lineStyle   % style of the line.
+        lineColor   % color of the lines.
         lineWidth   % width of the line.
         mode        % ROI mode: 0 - rectangular, 1 - parallelogram.
     end
@@ -62,7 +63,8 @@ classdef roi2 < handle
                                                 'tooltipString', 'ROI' );
             % Defaults:                                
             xyr.clicks = 0;
-            xyr.lineStyle = 'g--';
+            xyr.lineStyle = '-';
+            xyr.lineColor = [.5 .5 .5];
             xyr.lineWidth = 2;
             xyr.x2y = zeros(2,1);
             xyr.y2x = zeros(2,1);
@@ -254,14 +256,14 @@ classdef roi2 < handle
                 end
 
                 % Create the four lines:
-                xyr.hline(1) = plot(xyr.p([1,1],1), xyr.p([2,2],1),... 
-                                    xyr.lineStyle, 'lineWidth', xyr.lineWidth);
-                xyr.hline(2) = plot(xyr.p([1,1],1), xyr.p([2,2],1),... 
-                                    xyr.lineStyle, 'lineWidth', xyr.lineWidth);
-                xyr.hline(3) = plot(xyr.p([1,1],1), xyr.p([2,2],1),... 
-                                    xyr.lineStyle, 'lineWidth', xyr.lineWidth);
-                xyr.hline(4) = plot(xyr.p([1,1],1), xyr.p([2,2],1),... 
-                                    xyr.lineStyle, 'lineWidth', xyr.lineWidth);
+                xyr.hline(1) = plot(xyr.p([1,1],1), xyr.p([2,2],1), xyr.lineStyle,... 
+                                    'color', xyr.lineColor, 'lineWidth', xyr.lineWidth);
+                xyr.hline(2) = plot(xyr.p([1,1],1), xyr.p([2,2],1), xyr.lineStyle,... 
+                                    'color', xyr.lineColor, 'lineWidth', xyr.lineWidth);
+                xyr.hline(3) = plot(xyr.p([1,1],1), xyr.p([2,2],1), xyr.lineStyle,... 
+                                    'color', xyr.lineColor, 'lineWidth', xyr.lineWidth);
+                xyr.hline(4) = plot(xyr.p([1,1],1), xyr.p([2,2],1), xyr.lineStyle,... 
+                                    'color', xyr.lineColor, 'lineWidth', xyr.lineWidth);
 
                 % Activate the mouse motion callback:
                 set(xyr.hfig, 'windowButtonMotionFcn', @(src,evt) roi_bmcb(xyr,src,evt) );
@@ -326,17 +328,18 @@ classdef roi2 < handle
                     end
                         
                     % Plot the principle line:
-                    xyr.hline(1) = plot(xyr.p([1,1],1), xyr.p([2,2],1),... 
-                                        xyr.lineStyle, 'lineWidth', xyr.lineWidth);
+                    xyr.hline(1) = plot(xyr.p([1,1],1), xyr.p([2,2],1), xyr.lineStyle,...
+                                        'color', xyr.lineColor, 'lineWidth', xyr.lineWidth);
                     set(xyr.hfig, 'windowButtonMotionFcn', @(src,evt) roi_bmcb(xyr,src,evt) );
                 case 2
                     % second principle line:
-                    xyr.hline(2) = plot(xyr.p(1,1:2), xyr.p(2,1:2), xyr.lineStyle, 'lineWidth', xyr.lineWidth);
+                    xyr.hline(2) = plot(xyr.p(1,1:2), xyr.p(2,1:2), xyr.lineStyle,... 
+                                        'color', xyr.lineColor, 'lineWidth', xyr.lineWidth);
                     % side lines:
-                    xyr.hline(3) = plot(xyr.p([1,1],1), xyr.p([2,2],1),... 
-                                        xyr.lineStyle, 'lineWidth', xyr.lineWidth);
-                    xyr.hline(4) = plot(xyr.p([1,1],2), xyr.p([2,2],2),... 
-                                        xyr.lineStyle, 'lineWidth', xyr.lineWidth);
+                    xyr.hline(3) = plot(xyr.p([1,1],1), xyr.p([2,2],1), xyr.lineStyle,... 
+                                        'color', xyr.lineColor, 'lineWidth', xyr.lineWidth);
+                    xyr.hline(4) = plot(xyr.p([1,1],2), xyr.p([2,2],2), xyr.lineStyle,... 
+                                        'color', xyr.lineColor, 'lineWidth', xyr.lineWidth);
                 otherwise
                     xyr.clicks = 0;
                     
