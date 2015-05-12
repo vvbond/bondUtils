@@ -1,5 +1,5 @@
 function inputdlg_snippet()
-% Outputs an input dialog template..
+% Outputs an input dialog template.
 %
 % Usage: inputdlg_snippet()
 %
