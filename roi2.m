@@ -64,7 +64,7 @@ classdef roi2 < handle
             % Defaults:                                
             xyr.clicks = 0;
             xyr.lineStyle = '-';
-            xyr.lineColor = [.5 .5 .5];
+            xyr.lineColor = [.3 .3 .3];
             xyr.lineWidth = 2;
             xyr.x2y = zeros(2,1);
             xyr.y2x = zeros(2,1);
