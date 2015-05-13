@@ -1,5 +1,5 @@
 classdef Rulerz < handle
-% Interactive tool for measuring distances along x- and/or y-axes.
+%% Interactive tool for measuring distances along x- and/or y-axes.
     properties
         xx      % 2-vector of x-coordinates for the two vertical lines.
         yy      % 2-vector of y-coordinates for the two horizontal lines. 
@@ -27,7 +27,7 @@ classdef Rulerz < handle
     end
     
     methods
-        %% Constructor:
+        %% Constructor
         function rlz = Rulerz(raxis)
             
             % Parse input:
@@ -47,7 +47,7 @@ classdef Rulerz < handle
                     rlzIcon = load(fullfile(fileparts(mfilename('fullpath')),'/icons/Rulerz.mat'));
             end
 
-            rlz.hBtn = uitoggletool(ht, 'OnCallback', @(src,evt) RulerzON(rlz,src,evt),...
+            rlz.hBtn = uitoggletool(ht(1), 'OnCallback', @(src,evt) RulerzON(rlz,src,evt),...
                                         'OffCallback',@(src,evt) RulerzOFF(rlz,src,evt),...
                                         'CData', rlzIcon.cdata, ...
                                         'TooltipString', 'X-/Y- rulers', ...
@@ -72,7 +72,7 @@ classdef Rulerz < handle
         end
     end
     
-        %% Setter methods
+%% Setter methods
     methods 
         function set.axis(rlz, val)
         % Monitor the axis change and set the appropriate icon to the toolbar.
@@ -83,7 +83,7 @@ classdef Rulerz < handle
 %% Hidden methods handling user interactions
     methods(Hidden = true) 
         %% Rulerz ON:
-        function RulerzON(rlz, src, evt)
+        function RulerzON(rlz, ~, ~)
         % Display ruler lines.
             
             % Define x- and y- coordinates of the ruler lines:            
@@ -122,7 +122,7 @@ classdef Rulerz < handle
         end
         
         %% Rulerz OFF:
-        function RulerzOFF(rlz, src, evt)
+        function RulerzOFF(~, ~, ~)
             delete(findall(gcf, 'tag', 'rulersLine'));
             delete(findall(gcf, 'tag', 'rulersInfo'));
         end
@@ -192,7 +192,7 @@ classdef Rulerz < handle
         end
         
         %% Listener callback for the axisChange event
-        function axisChangeEvt(rlz, src, evt)
+        function axisChangeEvt(rlz, ~, ~)
     
             % Turn off the current ruler:
             if ishandle(rlz.hBtn)
