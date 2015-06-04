@@ -19,20 +19,28 @@ classdef Poker < handle
         bufun       % cell array of function handles, to be executed at the buttond up event.
     end
     properties(Hidden = true)
+        hBtn        % handle to the switch button.
         infotext
         panOn
         panOldAxis
         panFigPoint
         panScaling
         zoomSpeed
+        oldWindowButtonMotionFcn
+        oldWindowButtunUpFcn
+        oldWindowScrollWheelFcn
+        oldAxesButtonDownFcn
     end
     methods
         %% Constructor
         function tp = Poker(hfig)
+        % Constructor of a Poker object.
+        
             % Parse input:
             if nargin == 0
                 hfig = gcf;
             end
+            
             % Defaults:
             tp.hfig = hfig;
             tp.hax = gca;
@@ -46,23 +54,63 @@ classdef Poker < handle
             tp.fontSize = 12;
             tp.format = {'% 10.2f'};
             tp.color = 'w';
-            tp.infotext = text(tp.p(1),... 
-                               tp.p(2),... 
-                               { num2str(tp.p(1), tp.format{1}), num2str(tp.p(2), tp.format{end}) },...
-                               'FontSize', tp.fontSize,...
-                               'Color', tp.color);
             tp.bmfun = {};
             tp.bdfun = {};
             tp.bufun = {};
-            % Interaction callbacks:
+            
+            % Toggle button:
+            ht = findall(tp.hfig,'Type','uitoolbar');
+            PokerIcon = load(fullfile(fileparts(mfilename('fullpath')),'/icons/Poker1.mat'));
+            uitoggletool(ht(1), 'OnCallback',  @(src,evt) PokerON(tp,src,evt),...
+                                'OffCallback', @(src,evt) PokerOFF(tp,src,evt),...
+                                'CData', PokerIcon.cdata, ...
+                                'TooltipString', 'Figure "Poker" tool', ...
+                                'Tag', 'pkrBtn',... 
+                                'Separator', 'on');            
+        end
+        
+        %% ON switch
+        function PokerON(tp, src, evt)
+        % Enable the Poker tool.
+            
+            % Store existing interaction callbacks:
+            tp.oldWindowButtonMotionFcn = get(tp.hfig,'WindowButtonMotionFcn');
+            tp.oldWindowButtunUpFcn     = get(tp.hfig,'WindowButtonUpFcn');
+            tp.oldAxesButtonDownFcn = get(tp.hax, 'ButtonDownFcn');
+            tp.oldWindowScrollWheelFcn = get(tp.hfig, 'WindowScrollWheelFcn');
+
             set(tp.hfig,'WindowButtonMotionFcn',@(src,evt) wbmcb(tp,src,evt));
             set(tp.hfig,'WindowButtonUpFcn',    @(src,evt) wbucb(tp,src,evt));
             set(tp.hax, 'ButtonDownFcn', @(src,evt) axbdcb(tp,src,evt));
             set(tp.hfig, 'WindowScrollWheelFcn',  @(src,evt) wswcb(tp,src,evt));
             
-            
             % Disable hittest for images covering the whole axes:
             set(findall(gcf,'type','image'), 'HitTest', 'off');
+
+            % Initialize info display:
+            tp.infotext = text(tp.p(1),... 
+                               tp.p(2),... 
+                               { num2str(tp.p(1), tp.format{1}), num2str(tp.p(2), tp.format{end}) },...
+                               'FontSize', tp.fontSize,...
+                               'Color', tp.color);                           
+        end
+        
+        %% OFF switch
+        function PokerOFF(tp, src, evt)
+        % Disable the Poker tool.
+            
+            % Restore existing interaction callbacks:
+            set(tp.hfig, 'WindowButtonMotionFcn', tp.oldWindowButtonMotionFcn);
+            set(tp.hfig, 'WindowButtonUpFcn',     tp.oldWindowButtunUpFcn);
+            set(tp.hax,  'ButtonDownFcn',         tp.oldAxesButtonDownFcn);
+            set(tp.hfig, 'WindowScrollWheelFcn',  tp.oldWindowScrollWheelFcn);
+            
+            % Delete the info text:
+            set(tp.infotext, 'String', '');
+            
+            % Enable hittest for images covering the whole axes:
+            set(findall(gcf,'type','image'), 'HitTest', 'on');
+
         end
     end
     methods(Hidden = true, Access = private)
@@ -100,13 +148,18 @@ classdef Poker < handle
             
             % Execute mouse movement functions:
             for ii=1:length(tp.bmfun)
-                tp.bmfun{1}();
+                tp.bmfun{ii}(tp);
             end
         end
         
         %% Window button up callback
         function wbucb(tp,src,evt)
             tp.panOn = 0;
+            % Execute button up functions:
+            for ii=1:length(tp.bufun)
+                tp.bufun{ii}(tp);
+            end
+
         end
         %% Window button down callback
         function wbdcb(tp,src,evt)
