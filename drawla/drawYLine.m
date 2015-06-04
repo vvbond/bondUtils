@@ -34,6 +34,6 @@ if nargin==1, lType = 'k1--'; end
 
 % MAIN:
 xlims = xlim;
-hLine = drawLine([xlims; y y], lType);
+hLine = drawSegment([xlims; y y], lType);
 
 if nargout, varargout{1} = hLine; end
