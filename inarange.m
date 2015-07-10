@@ -23,7 +23,7 @@ function yn = inarange(x, rng, rngType)
 %% Parse input:
 narginchk(2,3);
 if nargin == 2
-    rngType = '(';
+    rngType = '[';
 end
 
 %% Main:
