@@ -6,7 +6,7 @@ function varargout = drawXLine(x, lType)
 %        hLine = drawXLine(y, lType)
 %
 % INPUT:
-% x             - scalar value of x.
+% x             - scalar or vector of line(s) abscissa(s).
 % (optional parameters)
 % lType         - string specifying line color, style and width, and
 %                 the marker, e.g., 'r2--*'.
@@ -25,7 +25,7 @@ function varargout = drawXLine(x, lType)
 
 % Copyright (c) 2009, Dr. Vladimir Bondarenko <http://sites.google.com/site/bondsite>
 
-% Check input:
+% Check input for sanity:
 error(nargchk(1,2,nargin));
 error(nargoutchk(0,1,nargout));
 
@@ -34,6 +34,8 @@ if nargin==1, lType = 'k1--'; end
 
 % MAIN:
 ylims = ylim;
-hLine = drawSegment([x x; ylims], lType);
+for ii=1:length(x)
+    hLine(ii) = drawSegment([x(ii) x(ii); ylims], lType);
+end
 
 if nargout, varargout{1} = hLine; end

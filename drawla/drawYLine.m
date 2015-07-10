@@ -6,7 +6,7 @@ function varargout = drawYLine(y, lType)
 %        hLine = drawYLine(y, lType)
 %
 % INPUT:
-% y             - scalar value of y.
+% y             - scalar or vector of line(s) ordinate(s).
 % (optional parameters)
 % lType         - string specifying line color, style and width, and
 %                 the marker, e.g., 'r2--*'.
@@ -34,6 +34,8 @@ if nargin==1, lType = 'k1--'; end
 
 % MAIN:
 xlims = xlim;
-hLine = drawSegment([xlims; y y], lType);
+for ii=1:length(y)
+    hLine(ii) = drawSegment([xlims; y(ii) y(ii)], lType);
+end
 
 if nargout, varargout{1} = hLine; end
