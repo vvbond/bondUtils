@@ -169,8 +169,14 @@ classdef Poker < handle
         %% Window Mouse scroll wheel callback
         function wswcb(tp,src,evt)
         % Zoom by scroll wheel.
+            y0 = [1 0]*get(gca,'currentPoint')*[0;1;0];
             zfactor = 1 + sign(evt.VerticalScrollCount)*tp.zoomSpeed;
             zoom(zfactor);
+            % Adjuts ylims to center the axes on the cursor point:
+            y1 = [1 0]*get(gca,'currentPoint')*[0;1;0];
+            ylims = ylim;
+            dy = y1 - y0;
+            ylim(ylims - dy);
         end
         
         %% Axis button down (click) callback

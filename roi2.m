@@ -93,6 +93,9 @@ classdef roi2 < handle
         %% Create new ROI
         function xyr = newroi(xyr)
             
+            % Disable other interactive tools:
+            zoom off, pan off, datacursormode off
+            
             % Delete the previous roi:
             if ishandle(xyr.hline)
                 delete(xyr.hline);
