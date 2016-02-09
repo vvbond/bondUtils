@@ -1,12 +1,13 @@
 classdef fPoker < handle
-% Poker is an interactive tool for "poking" in a figure. 
+% Interactive tool for figure exloring ("poking").
 % 
-% WTP facilitates live pointer display, scroll-wheel zooming and drag-like axes panning.
+% The tool facilitates live pointer display, scroll-wheel zooming and drag-like axes panning.
 
     properties
         p           % 1-by-2 vector of pointer x and y coordinates.
+        pix         % for images only, 1-by-2 vector of pointer x and y indices.
         hfig        % asociated figure handle.
-        hax         % handle to the current figure
+        hax         % handle to the current axes.
         format      % text format.
         color       % text color.
         padding     % 1-by-2 vector of padding along x and y coordinates, [px].
@@ -18,6 +19,30 @@ classdef fPoker < handle
         bdfun       % cell array of function handles, to be executed at the buttond down (i.e., click) event.
         bufun       % cell array of function handles, to be executed at the buttond up event.
     end
+    
+    % Image-related properties:
+    properties(Hidden = true)
+        xplot
+        yplot
+        himg        % handle to the image in the figure.
+        p0          % coordinates of the image origin.
+        dx          % increment on the x-axis.
+        dy          % increment on the y-axis.
+        hXfig       % handle of the X-monitor figure.
+        hYfig       % handle of the Y-monitor figure.
+        hXplot      % handles for the x/y line plots.
+        hYplot
+        hXplot_Y    % handles for position markers in the X/Y moninitor.
+        hYplot_X
+        hXMonitorTitle
+        hYMonitorTitle
+        xMonitorOnOff = 0;  % X/Y monitor switches.
+        yMonitorOnOff = 0;
+        xMonitorRunning = 0;
+        yMonitorRunning = 0;
+    end
+    
+    % Auxiliary properties:
     properties(Hidden = true)
         hBtn        % handle to the switch button.
         infotext
@@ -31,10 +56,14 @@ classdef fPoker < handle
         oldWindowScrollWheelFcn
         oldAxesButtonDownFcn
     end
+    
+    properties(Access = private)
+        OnOff = 0      % boolean indicating tool's on/off state.
+    end
+    
     methods
         %% Constructor
         function fp = fPoker(hfig)
-        % Constructor of an fPoker object.
         
             % Parse input:
             if nargin == 0
@@ -61,18 +90,55 @@ classdef fPoker < handle
             % Toggle button:
             ht = findall(fp.hfig,'Type','uitoolbar');
             PokerIcon = load(fullfile(fileparts(mfilename('fullpath')),'/icons/fPoker1.mat'));
-            uitoggletool(ht(1), 'OnCallback',  @(src,evt) PokerON(fp,src,evt),...
+            fp.hBtn = uitoggletool(ht(1), 'OnCallback',  @(src,evt) PokerON(fp,src,evt),...
                                 'OffCallback', @(src,evt) PokerOFF(fp,src,evt),...
                                 'CData', PokerIcon.cdata, ...
                                 'TooltipString', 'Figure "Poker" tool', ...
                                 'Tag', 'pkrBtn',... 
-                                'Separator', 'on');            
+                                'Separator', 'on');
+            
+           % If a figure has an image, grab its handle:
+           fp.himg = findobj(fp.hfig, 'type', 'image');
+           
+           %  Get scaling info about the image:
+           if ishandle(fp.himg)
+               fp.p0 = [fp.himg.XData(1) fp.himg.YData(1)];
+               
+               [nRows, nCols] = size(fp.himg.CData);
+               if length(fp.himg.XData) == nCols
+                   fp.dx = diff(fp.himg.XData(1:2));
+               else
+                   warning('The length of the X-coordinate vector doesn''t match the number of columns in the image.');
+                   fp.dx = range(fp.himg.XData)/( nCols - 1 );
+               end
+               
+               if length(fp.himg.YData) == nRows
+                   fp.dy = diff(fp.himg.YData(1:2));
+               else
+                   warning('The length of the Y-coordinate vector doesn''t match the number of rows in the image.');
+                   fp.dy = range(fp.himg.XData)/( nRows - 1 );
+               end
+
+               
+               % Prepare handles for the X/Y line plots:
+               fp.hXfig = randi(1e6);
+               fp.hYfig = randi(1e6);
+           end
+           
+        end
+        
+        %% Destructor
+        function delete(fp)
+            
+            if ishandle(fp.hBtn)
+                delete(fp.hBtn);
+            end
         end
         
         %% ON switch
         function PokerON(fp, src, evt)
         % Enable the Poker tool.
-            
+        
             % Store existing interaction callbacks:
             fp.oldWindowButtonMotionFcn = get(fp.hfig,'WindowButtonMotionFcn');
             fp.oldWindowButtunUpFcn     = get(fp.hfig,'WindowButtonUpFcn');
@@ -92,7 +158,18 @@ classdef fPoker < handle
                                fp.p(2),... 
                                { num2str(fp.p(1), fp.format{1}), num2str(fp.p(2), fp.format{end}) },...
                                'FontSize', fp.fontSize,...
-                               'Color', fp.color);                           
+                               'Color', fp.color);
+            
+            % Re-initialize the X- and Y-monitor figures:
+            if ishandle(fp.himg)
+                fp.hXfig = randi(1e6);
+                fp.hYfig = randi(1e6);
+                fp.hXplot = -1;
+                fp.hYplot = -1;
+            end
+            
+            % Update the state:
+            fp.OnOff = 1;
         end
         
         %% OFF switch
@@ -110,7 +187,97 @@ classdef fPoker < handle
             
             % Enable hittest for images covering the whole axes:
             set(findall(gcf,'type','image'), 'HitTest', 'on');
-
+            
+            % Update the state:
+            fp.OnOff = 0;
+        end
+        
+        %% X/Y monitor switch
+        function monitor(fp, dim)
+        % Toggle the x- or y- monitor.
+        %
+        % dim - string: 'x' or 'y'.
+            switch dim
+                case 'x'
+                    fp.xMonitorOnOff = mod(fp.xMonitorOnOff + 1, 2); % flip the switch.
+                    if fp.OnOff && fp.xMonitorOnOff && ~ishandle(fp.hXfig) 
+                        figure(fp.hXfig);
+                        set(fp.hXfig, 'NumberTitle', 'off', 'Name', 'X-Monitor');
+                    end
+                    
+                    % Report the status:
+                    if fp.xMonitorOnOff
+                        disp('X-Monitor enabled: click to activate/deactivate.');
+                    else
+                        disp('X-Monitor disabled.');
+                    end
+                    
+                case 'y'
+                    fp.yMonitorOnOff = mod(fp.yMonitorOnOff + 1, 2); % flip the switch.
+                    if fp.OnOff && fp.yMonitorOnOff && ~ishandle(fp.hYfig)
+                        figure(fp.hYfig);
+                        set(fp.hXfig, 'NumberTitle', 'off', 'Name', 'Y-Monitor');
+                    end
+                    
+                    % Report the status:
+                    if fp.yMonitorOnOff
+                        disp('Y-Monitor enabled: click to activate/deactivate.');
+                    else
+                        disp('Y-Monitor disabled.');
+                    end
+            end
+        end
+        
+        %% X/Y line plots
+        function xmonitor(fp)
+            if isempty(fp.hXplot) || ~ishandle(fp.hXplot)
+                fp.xplot = [fp.himg.YData(:), fp.himg.CData(:,fp.pix(1))];
+                yLabel = get(fp.hax, 'YLabel');
+                
+                figure(fp.hXfig); clf;
+                set(fp.hXfig, 'NumberTitle', 'off', 'Name', 'X-Monitor');
+                fp.hXplot = plot(fp.xplot(:,1), fp.xplot(:,2)); 
+                
+                % Vertical line indicating the cursor position:
+%                 hold on;
+%                 fp.hXplot_Y = plot([1 1]*fp.p(2), ylim, '--');
+%                 hold off;
+                fp.hXMonitorTitle = title(sprintf('x = %1.2f;  ix = %1d', fp.p(1), fp.pix(1)));
+                xlabel(yLabel.String);
+                box on; grid on;
+                
+                % Return focus to the main figure:
+                figure(fp.hfig);
+            else
+                fp.xplot(:,2) = fp.himg.CData(:, fp.pix(1));
+                set(fp.hXplot, 'ydata', fp.xplot(:,2) );
+%                 set(fp.hXplot_Y, 'xdata', [1 1]*fp.p(2), 'ydata', arange(fp.himg.CData(:,fp.pix(1))));
+                set(fp.hXMonitorTitle, 'String', sprintf('x = %1.2f;  ix = %1d', fp.p(1), fp.pix(1)));
+            end
+        end
+        
+        function ymonitor(fp)
+            if isempty(fp.hYplot) || ~ishandle(fp.hYplot)
+                fp.yplot = [fp.himg.XData(:), fp.himg.CData(fp.pix(2), :)'];
+                yLabel = get(fp.hax, 'XLabel');
+                
+                figure(fp.hYfig); clf;
+                set(fp.hYfig, 'NumberTitle', 'off', 'Name', 'Y-Monitor');
+                fp.hYplot = plot(fp.yplot(:,1), fp.yplot(:,2)); 
+%                 hold on;
+%                 fp.hYplot_X = plot([1 1]*fp.p(2), ylim, '--');
+%                 hold off;
+                fp.hYMonitorTitle = title(sprintf('y = %1.2f;  ix = %1d', fp.p(2), fp.pix(2)));
+                xlabel(yLabel.String);
+                box on; grid on;
+                
+                % Return focus to the main figure:
+                figure(fp.hfig);
+            else
+                set(fp.hYplot, 'ydata', fp.himg.CData(fp.pix(2), :));
+%                 set(fp.hYplot_X, 'xdata', [1 1]*fp.p(2), 'ydata', arange(fp.himg.CData(:,fp.pix(1))));
+                set(fp.hYMonitorTitle, 'String', sprintf('y = %1.2f;  ix = %1d', fp.p(2), fp.pix(2)));
+            end
         end
     end
     methods(Hidden = true, Access = private)
@@ -120,10 +287,26 @@ classdef fPoker < handle
             pos = get(gca,'CurrentPoint');
             fp.p = pos(1,[1 2]); % cursor position.
             
+            cursorString = { num2str(fp.p(1), fp.format{1}), num2str(fp.p(2), fp.format{end}) };
+            
+            % Find corresponding indices into the image matrix:
+            if ishandle(fp.himg)
+                fp.pix = round((fp.p-fp.p0)./[fp.dx, fp.dy])+1;
+                % Clip to the image range:
+                fp.pix(fp.pix <= 0) = 1;
+                [m n] = size(fp.himg.CData);
+                if fp.pix(1) > n, fp.pix(1) = n; end
+                if fp.pix(2) > m, fp.pix(1) = m; end
+                
+                cursorString = { sprintf([fp.format{1} ' (%3d)'], fp.p(1), fp.pix(1))
+                                 sprintf([fp.format{end} ' (%3d)'], fp.p(2), fp.pix(2)) };
+                    
+            end
+            
             % Display the cursor position sideways of the cursor:
             if fp.displayOn
                 set(fp.infotext, 'Position', [fp.p 0],... 
-                                 'String', { num2str(fp.p(1), fp.format{1}), num2str(fp.p(2), fp.format{end}) },...
+                                 'String', cursorString,...
                                  'Color', fp.color,...
                                  'Units', 'data',...
                                  'HitTest', 'off');
@@ -146,6 +329,16 @@ classdef fPoker < handle
                 end
             end
             
+            % X/Y monitor:            
+            if fp.xMonitorOnOff && fp.xMonitorRunning
+                fp.xmonitor();
+            end
+            
+            if fp.yMonitorOnOff && fp.yMonitorRunning
+                fp.ymonitor();
+            end
+
+            
             % Execute mouse movement functions:
             for ii=1:length(fp.bmfun)
                 fp.bmfun{ii}(fp);
@@ -155,6 +348,15 @@ classdef fPoker < handle
         %% Window button up callback
         function wbucb(fp,src,evt)
             fp.panOn = 0;
+            
+            if fp.xMonitorOnOff
+                fp.xMonitorRunning  = mod(fp.xMonitorRunning + 1, 2); % flip the switch.
+            end
+            
+            if fp.yMonitorOnOff
+                fp.yMonitorRunning  = mod(fp.yMonitorRunning + 1, 2); % flip the switch.
+            end
+
             % Execute button up functions:
             for ii=1:length(fp.bufun)
                 fp.bufun{ii}(fp);
