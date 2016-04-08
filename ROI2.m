@@ -42,7 +42,6 @@ classdef ROI2 < handle
         lineIx      % index of the selected line in the hline array.
         old_cpos    % store cursor position for line movement.
         old_p       % store the ROI points matrix, p.
-        moveROI     % switch between moving and resizing of the ROI.
     end
     
     % Image related properties:
@@ -317,7 +316,6 @@ classdef ROI2 < handle
                 
                 % If the pointer is within the ROI:
                 if all(prod([cpos cpos] - [xyr.xrng; xyr.yrng], 2) < 0) 
-                    xyr.moveROI = 1;
                     set(gcf,'Pointer','fleur');
                     
                     % Store previous interaction callbacks:
@@ -335,7 +333,6 @@ classdef ROI2 < handle
 
         function fkrcb(xyr,src,evt)
         % Handler for the figure keyboard release event.
-            xyr.moveROI = 0;
             set(gcf,'Pointer','arrow');
             
             % Restore callbacks:
