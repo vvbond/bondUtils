@@ -33,7 +33,7 @@ classdef RoI1 < handle
     
     methods
         %% Constructor
-        function r1 = roi1(rng)
+        function r1 = RoI1(rng)
             
             % Create roi button:
             r1.hfig  = gcf;

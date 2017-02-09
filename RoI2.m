@@ -64,7 +64,7 @@ classdef RoI2 < handle
     
     methods
         %% Constructor
-        function xyr = ROI2(hfig, roimode)
+        function xyr = RoI2(hfig, roimode)
             
             % Parse input:
             if nargin == 0
@@ -129,7 +129,6 @@ classdef RoI2 < handle
             if ishandle(xyr.hline), delete(xyr.hline); end
             % Restore figure keyboard events:
             set(xyr.hfig, 'KeyPressFcn', xyr.old_keyPressCb, 'KeyReleaseFcn', xyr.old_keyReleaseCb);
-
         end
         
         %% ROI On/Off callbacks
