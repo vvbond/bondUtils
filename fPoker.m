@@ -1,5 +1,5 @@
 classdef fPoker < handle
-% Interactive tool for figure exloring ("poking").
+% Interactive tool to poke around in a figure.
 % 
 % The tool facilitates live pointer display, scroll-wheel zooming and drag-like axes panning.
 
@@ -89,19 +89,21 @@ classdef fPoker < handle
             
             % Toggle button:
             ht = findall(fp.hfig,'Type','uitoolbar');
-            PokerIcon = load(fullfile(fileparts(mfilename('fullpath')),'/icons/fPoker1.mat'));
-            fp.hBtn = uitoggletool(ht(1), 'OnCallback',  @(src,evt) PokerON(fp,src,evt),...
-                                'OffCallback', @(src,evt) PokerOFF(fp,src,evt),...
-                                'CData', PokerIcon.cdata, ...
-                                'TooltipString', 'Figure "Poker" tool', ...
-                                'Tag', 'pkrBtn',... 
-                                'Separator', 'on');
+            if isempty(findobj(ht, 'Tag', 'pkrBtn'))
+                PokerIcon = load(fullfile(fileparts(mfilename('fullpath')),'/icons/fPoker1.mat'));
+                fp.hBtn = uitoggletool(ht(1), 'OnCallback',  @(src,evt) PokerON(fp,src,evt),...
+                                    'OffCallback', @(src,evt) PokerOFF(fp,src,evt),...
+                                    'CData', PokerIcon.cdata, ...
+                                    'TooltipString', 'Figure "Poker" tool', ...
+                                    'Tag', 'pkrBtn',... 
+                                    'Separator', 'on');
+            end
             
-           % If a figure has an image, grab its handle:
-           fp.himg = findobj(fp.hfig, 'type', 'image');
+           % If axes has an image, grab its handle:
+           fp.himg = findobj(fp.hax, 'type', 'image');
            
            %  Get scaling info about the image:
-           if ishandle(fp.himg)
+           if ~isempty(fp.himg) && ishandle(fp.himg)
                fp.p0 = [fp.himg.XData(1) fp.himg.YData(1)];
                
                [nRows, nCols] = size(fp.himg.CData);
@@ -109,21 +111,24 @@ classdef fPoker < handle
                    fp.dx = diff(fp.himg.XData(1:2));
                else
                    warning('The length of the X-coordinate vector doesn''t match the number of columns in the image.');
-                   fp.dx = range(fp.himg.XData)/( nCols - 1 );
+                   fp.dx = diff(fp.himg.XData([1,end]) )/( nCols - 1 );
                end
                
                if length(fp.himg.YData) == nRows
                    fp.dy = diff(fp.himg.YData(1:2));
                else
                    warning('The length of the Y-coordinate vector doesn''t match the number of rows in the image.');
-                   fp.dy = range(fp.himg.XData)/( nRows - 1 );
+                   fp.dy = diff(fp.himg.XData([1,end]))/( nRows - 1 );
                end
 
                
                % Prepare handles for the X/Y line plots:
                fp.hXfig = randi(1e6);
                fp.hYfig = randi(1e6);
+           else
+               fp.color = 'k';
            end
+           
            
         end
         
@@ -139,6 +144,11 @@ classdef fPoker < handle
         function PokerON(fp, src, evt)
         % Enable the Poker tool.
         
+            % Turn off other interactive tools:
+            pan off, zoom off, plotedit off, datacursormode off
+            
+            fp.hax = gca;
+            
             % Store existing interaction callbacks:
             fp.oldWindowButtonMotionFcn = get(fp.hfig,'WindowButtonMotionFcn');
             fp.oldWindowButtunUpFcn     = get(fp.hfig,'WindowButtonUpFcn');
@@ -245,6 +255,7 @@ classdef fPoker < handle
                 fp.hXMonitorTitle = title(sprintf('x = %1.2f;  ix = %1d', fp.p(1), fp.pix(1)));
                 xlabel(yLabel.String);
                 box on; grid on;
+                pan xon; zoom xon
                 
                 % Return focus to the main figure:
                 figure(fp.hfig);
@@ -337,7 +348,6 @@ classdef fPoker < handle
             if fp.yMonitorOnOff && fp.yMonitorRunning
                 fp.ymonitor();
             end
-
             
             % Execute mouse movement functions:
             for ii=1:length(fp.bmfun)
@@ -347,21 +357,29 @@ classdef fPoker < handle
         
         %% Window button up callback
         function wbucb(fp,src,evt)
-            fp.panOn = 0;
-            
-            if fp.xMonitorOnOff
-                fp.xMonitorRunning  = mod(fp.xMonitorRunning + 1, 2); % flip the switch.
-            end
-            
-            if fp.yMonitorOnOff
-                fp.yMonitorRunning  = mod(fp.yMonitorRunning + 1, 2); % flip the switch.
-            end
 
-            % Execute button up functions:
-            for ii=1:length(fp.bufun)
-                fp.bufun{ii}(fp);
-            end
+            switch src.SelectionType
+                case 'normal'     % single click.
+                    fp.panOn = 0;
 
+                    if fp.xMonitorOnOff
+                        fp.xMonitorRunning  = mod(fp.xMonitorRunning + 1, 2); % flip the switch.
+                    end
+
+                    if fp.yMonitorOnOff
+                        fp.yMonitorRunning  = mod(fp.yMonitorRunning + 1, 2); % flip the switch.
+                    end
+                    
+                    % Execute user-defined button up functions:
+                    for ii=1:length(fp.bufun)
+                        fp.bufun{ii}(fp);
+                    end
+                case 'open'     % double click.
+                    axis tight
+                    fp.panOn = 0;
+            end
+                
+            
         end
         %% Window button down callback
         function wbdcb(fp,src,evt)
@@ -371,18 +389,23 @@ classdef fPoker < handle
         %% Window Mouse scroll wheel callback
         function wswcb(fp,src,evt)
         % Zoom by scroll wheel.
-            y0 = [1 0]*get(gca,'currentPoint')*[0;1;0];
+        
+            % Store current cursor position:
+            cpos = get(gca,'currentPoint'); xy0 = cpos(1,1:2);
+            
+            % Zoom:
             zfactor = 1 + sign(evt.VerticalScrollCount)*fp.zoomSpeed;
             zoom(zfactor);
-            % Adjuts ylims to center the axes on the cursor point:
-            y1 = [1 0]*get(gca,'currentPoint')*[0;1;0];
-            ylims = ylim;
-            dy = y1 - y0;
-            ylim(ylims - dy);
+            
+            % Adjust x and y lims to restore the cursor position:
+            cpos = get(gca,'currentPoint'); xy1 = cpos(1,1:2);
+            delta = xy1 - xy0;
+            axis(axis - delta*blkdiag([1 1], [1 1]));
         end
         
         %% Axis button down (click) callback
         function axbdcb(fp,src,evt)
+            
             fp.panOn  = 1;
             oldFigUnits = get(gcf, 'Units');
             set(gcf, 'units', 'pixels');
