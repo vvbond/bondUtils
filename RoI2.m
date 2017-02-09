@@ -1,4 +1,4 @@
-classdef ROI2 < handle
+classdef RoI2 < handle
     % Interactive tool for specifying a 2D region of interest (ROI).
     %
     

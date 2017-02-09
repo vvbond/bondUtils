@@ -1,4 +1,4 @@
-classdef roi1 < handle
+classdef RoI1 < handle
     % Interactive tool for specifying a 1D region of interest (ROI).
     %   Detailed explanation goes here
     
