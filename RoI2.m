@@ -1,5 +1,7 @@
 classdef ROI2 < handle
     % Interactive tool for specifying a 2D region of interest (ROI).
+    %
+    
     
     %% 23-Apr-2015
     %% (c) Vladimir Bondarenko, http://www.mathworks.co.uk/matlabcentral/fileexchange/authors/52876
@@ -17,6 +19,7 @@ classdef ROI2 < handle
         lineColor   % color of the lines.
         lineWidth   % width of the line.
         mode        % ROI mode: 0 - rectangular, 1 - parallelogram.
+        userFcn     % user-defined function.
     end
     
     properties(Hidden = true)
@@ -148,7 +151,7 @@ classdef ROI2 < handle
         function xyr = newroi(xyr)
             
             % Disable other interactive tools:
-            zoom off, pan off, datacursormode off
+            zoom off, pan off, datacursormode off, plotedit off
             
             % Delete the previous roi:
             if ishandle(xyr.hline)
@@ -180,7 +183,6 @@ classdef ROI2 < handle
             set(xyr.hfig, 'windowButtonDownFcn', @(src,evt) roi_bdcb(xyr,src,evt), ...
                           'KeyPressFcn',   @(src,evt) fkpcb(xyr,src,evt), ...
                           'KeyReleaseFcn', @(src,evt) fkrcb(xyr,src,evt) );
-            xyr.moveROI = 0;
             hold on;
         end
         
@@ -219,6 +221,9 @@ classdef ROI2 < handle
             xyr.old_bdcb = get(gcf,'WindowButtonDownFcn');
             xyr.old_bmcb = get(gcf,'WindowButtonMotionFcn');
             xyr.old_bucb = get(gcf,'WindowButtonUpFcn');
+            
+            % Update axes limits:
+            xyr.axlims = axis;
             
             % Set new interaction callbacks:
             set(xyr.hfig, 'windowButtonMotionFcn', @(src,evt) line_bmcb(xyr,src,evt),...
@@ -264,6 +269,11 @@ classdef ROI2 < handle
                     new_p(2,:)>=xyr.axlims(3), new_p(2,:)<=xyr.axlims(4)])
                xyr.p(:,pIx) = new_p;
                xyr.update();
+               
+               % Call the user-defined function:
+               if ~isempty(xyr.userFcn)
+                   xyr.userFcn(xyr);
+               end
             end
         end
         
@@ -281,6 +291,10 @@ classdef ROI2 < handle
             xyr.old_cpos = cpos(1,1:2)';
             xyr.old_p = xyr.p;
             
+            % Update axes limits:
+            xyr.axlims = axis;
+            
+            % Set the mouse motion function:
             set(xyr.hfig, 'windowButtonMotionFcn', @(src,evt) roiMove_bmcb(xyr,src,evt));
         end
         
@@ -302,11 +316,15 @@ classdef ROI2 < handle
             % Check if the ROI exceeds axes limits:
             if all([new_p(1,:)>=xyr.axlims(1), new_p(1,:)<=xyr.axlims(2),...
                     new_p(2,:)>=xyr.axlims(3), new_p(2,:)<=xyr.axlims(4)])
-               xyr.p = new_p;
-               xyr.update();
+                xyr.p = new_p;
+                xyr.update();
+               
+                % Call the user-defined function:
+                if ~isempty(xyr.userFcn)
+                   xyr.userFcn(xyr);
+                end
             end
         end
-        
         %% Keyboard events callbacks
         function fkpcb(xyr, src, evt)
         % Handler for the figure keypress event.
@@ -325,7 +343,7 @@ classdef ROI2 < handle
                     
                     % Set new interaction callbacks:
                     set(xyr.hfig, 'windowButtonDownFcn', @(src,evt) roiMove_bdcb(xyr,src,evt), ...
-                                  'windowButtonUpFcn', @(src,evt) roiMove_bucb(xyr,src,evt) );
+                                  'windowButtonUpFcn',   @(src,evt) roiMove_bucb(xyr,src,evt) );
 
                 end
             end
@@ -351,20 +369,13 @@ classdef ROI2 < handle
                     set(xyr.hline(2), 'xdata', xyr.p(1,1:2), 'ydata', xyr.p(2,[2 2]));
                     set(xyr.hline(3), 'xdata', xyr.p(1,[1 1]), 'ydata', xyr.p(2,1:2));
                     set(xyr.hline(4), 'xdata', xyr.p(1,[2 2]), 'ydata', xyr.p(2,1:2));
-                    
-                    % Update ranges:
-                    xyr.xrng = [min(xyr.p(1,:)) max(xyr.p(1,:))];
-                    xyr.yrng = [min(xyr.p(2,:)) max(xyr.p(2,:))];
+                                                            
                 case 1
                     set(xyr.hline(1), 'xdata', xyr.p(1,[1 2]), 'ydata', xyr.p(2,[1 2]));
                     set(xyr.hline(2), 'xdata', xyr.p(1,[3 4]), 'ydata', xyr.p(2,[3 4]));
                     set(xyr.hline(3), 'xdata', xyr.p(1,[1 3]), 'ydata', xyr.p(2,[1 3]));
                     set(xyr.hline(4), 'xdata', xyr.p(1,[2 4]), 'ydata', xyr.p(2,[2 4]));
-
-                    % Update ranges:
-                    xyr.xrng = [min(xyr.p(1,:)) max(xyr.p(1,:))];
-                    xyr.yrng = [min(xyr.p(2,:)) max(xyr.p(2,:))];
-                    
+                   
                     % Coefficients of the y = a*x+b line:
                     xyr.x2y = [ diff(xyr.p(2,[1 2]));
                                -det(xyr.p(:,[1 2]))  ]/diff(xyr.p(1,[1 2]));
@@ -372,9 +383,21 @@ classdef ROI2 < handle
                     xyr.y2x = [ diff(xyr.p(1,[1 2]));
                                 det(xyr.p(:,[1 2]))  ]/diff(xyr.p(2,[1 2]));
             end
+            
+            % Update ranges:
+            xyr.xrng = [min(xyr.p(1,:)) max(xyr.p(1,:))];
+            xyr.yrng = [min(xyr.p(2,:)) max(xyr.p(2,:))];
+
+            % Find corresponding image indices:
+            if ishandle(xyr.himg)
+                v1 = ones(1, size(xyr.p,2));
+                xyr.p_ix = round((xyr.p - xyr.p0*v1)./([xyr.dxx; xyr.dyy]*v1))+1;
+                xyr.xrng_ix = round((xyr.xrng - xyr.p0(1)*v1)./[xyr.dxx xyr.dxx])+1;
+                xyr.yrng_ix = round((xyr.yrng - xyr.p0(2)*v1)./[xyr.dyy xyr.dyy])+1;
+            end
         end
         
-        %% Draw rectangular ROI
+        %% Rectangular ROI
         function roiCreateRectangle(xyr)
             
             cpos = get(gca, 'currentPoint');
@@ -453,7 +476,7 @@ classdef ROI2 < handle
             end                        
         end
         
-        %% Draw parallelogram ROI
+        %% Parallelogram ROI
         function roiCreateParallelogram(xyr)
             
             cpos = get(gca, 'currentPoint');
@@ -546,8 +569,7 @@ classdef ROI2 < handle
                     disp('hey, you shouldn''t ever see this message.');
             end            
         end
-        
-        
+                
         %% Sample ROI
         function [D, xroi, yroi] = sample(xyr)
             

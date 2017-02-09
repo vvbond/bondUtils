@@ -11,6 +11,7 @@ classdef roi1 < handle
         displayFcn          % handle of the display function, returning an info string: str = f(rng).
                             % Default: @(rng) ['ROI: [' num2str(rng(:)', '%5.2f ') ']' ].
         displayPosition    % 4-vector of [left top height width] parameters of the display box. Default: [.7 .85 .1 .1]
+        userFcn            % user-defined function, called on mouse motion event.
     end
     
     properties(Hidden = true)
@@ -49,12 +50,13 @@ classdef roi1 < handle
             r1.lineColor = [.5 .5 .5];
             r1.lineWidth = 2;
             r1.displayPosition = [.65 .85 .1 .1];
-            xlims = get(gca,'xlim')';
-            if nargin == 0
-                r1.rng = xlims(1) + diff(xlims)*[1; 2]./3;
-            else
+            
+            % Range initialization:
+            r1.rng = [];
+            if nargin == 1
                 r1.rng = rng;
             end
+            
             r1.lineIx = 0;
             r1.on = 0;
             r1.displayFcn = @(rng) ['ROI: [' num2str(rng(:)', '%5.2f ') ']  (' num2str(diff(rng), '%5.2f)') ];
@@ -73,6 +75,11 @@ classdef roi1 < handle
         %% ROI on callback
         function roiOn(r1,~,~)
             
+            if isempty(r1.rng)      % if range is not initialized yet.
+                xlims = get(gca,'xlim')';
+                r1.rng = xlims(1) + diff(xlims)*[1; 2]./3;
+            end
+                        
             % Plot ROI lines:
             r1.old_NextPlot = get(gca,'NextPlot');
             hold on;
@@ -93,6 +100,8 @@ classdef roi1 < handle
             
             % Set the interaction callbacks:
             set(r1.hline([1 2]), 'buttonDownFcn', @(src,evt) roi1_bdcb(r1,src,evt));
+            set(gca, 'buttonDownFcn', @(src,evt) roi1_axis_bdcb(r1,src,evt));
+            
             
             % Display the info box:
             r1.hinfobx = annotation('textbox', r1.displayPosition,...
@@ -126,19 +135,39 @@ classdef roi1 < handle
             r1.old_bmcb = get(r1.hfig, 'WindowButtonMotionFcn');
             r1.old_bucb = get(r1.hfig, 'WindowButtonUpFcn');
             
-            set(r1.hfig, 'windowButtonMotionFcn', @(src,evt) roi1_wbmcb(r1,src,evt),...
-                            'windowButtonUpFcn', @(src,evt) roi1_wbucb(r1,src,evt) );
+            set(r1.hfig, 'windowButtonMotionFcn', @(src,evt) roi1_wbmcb(r1,src,evt, 0),...
+                         'windowButtonUpFcn',     @(src,evt) roi1_wbucb(r1,src,evt) );
+        end
+        
+        function roi1_axis_bdcb(r1,src,evt)
+            cpos = get(gca, 'currentPoint');
+            if inarange(cpos(1,1), r1.rng)
+                r1.lineIx = 1;
+                dx = r1.rng(1) - cpos(1,1);
+                set(r1.hfig, 'windowButtonMotionFcn', @(src,evt) roi1_wbmcb(r1,src,evt, dx),...
+                              'windowButtonUpFcn',    @(src,evt) roi1_wbucb(r1,src,evt) );
+            end
         end
         
         %% Interactions: window button motion callback
-        function roi1_wbmcb(r1,~,~)
+        function roi1_wbmcb(r1,~,~, dx)
             if r1.lineIx
+                roi_width = diff(r1.rng);
                 cpos = get(gca, 'currentPoint');
-                r1.rng(r1.lineIx) = cpos(1,1);
+                r1.rng(r1.lineIx) = cpos(1,1) + dx;
                 % Update plot:
                 set(r1.hline(r1.lineIx), 'xdata', [1 1]*r1.rng(r1.lineIx));
-%                 set(r1.hline(3), 'xdata', r1.rng);
+                if dx ~= 0     % update the second (end) line if dragging the roi.
+                    r1.rng(2) = r1.rng(1) + roi_width;
+                    set(r1.hline(2), 'xdata', [1 1]*r1.rng(2));
+                end
                 set(r1.hinfobx, 'String', r1.infoString() );
+                
+                % Call user-defined function:
+                if ~isempty(r1.userFcn)
+                    r1.userFcn(r1);
+                    figure(r1.hfig);
+                end
             end
         end
         
