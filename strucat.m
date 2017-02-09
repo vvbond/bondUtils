@@ -31,6 +31,24 @@ if length(ss)==1
 else
     fieldNames = fieldnames(ss);
     for ii=1:length(fieldNames)
-        s.(fieldNames{ii}) = vertcat(ss(:).(fieldNames{ii}) );
+        % Find common dimension:
+        sz1 = size(ss(1).(fieldNames{ii}));
+        sz2 = size(ss(2).(fieldNames{ii}));
+        commonDim = find(sz1 == sz2);
+        if isempty(commonDim)
+            warning('Cannot conctatenat field %s. Dimensions do not aggree.', ss(1).fieldNames{ii});
+            continue;
+        elseif numel(commonDim)==2
+            [~, commonDim] = min(sz1(commonDim));    % if both dimensions aggree, the minimum one is defined as the common dimension.
+        end
+       
+        switch commonDim
+            case 1  % Concatenate rows.
+                s.(fieldNames{ii}) = horzcat(ss(:).(fieldNames{ii}) );
+            case 2  % Concatenate columns.
+                s.(fieldNames{ii}) = vertcat(ss(:).(fieldNames{ii}) );
+            otherwise
+                warning('Something went wrong.');
+        end
     end    
 end
