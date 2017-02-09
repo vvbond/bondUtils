@@ -5,7 +5,7 @@ function yn = inarange(x, rng, rngType)
 %
 % INPUT:
 %  x - scalar or vector.
-%  rng - 2-vector, [from to].
+%  rng - 2-vector, [from to] or [to from].
 % Optional:
 %  rngType - 1 character string: '(' or '[' - exclusive (default) or inclusive range.
 %
@@ -27,6 +27,7 @@ if nargin == 2
 end
 
 %% Main:
+rng = sort(rng);
 switch rngType
     case '('
         yn = ( x>rng(1) ) & ( x<rng(2) ); 
