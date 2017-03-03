@@ -26,8 +26,8 @@ function varargout = drawXLine(x, lType)
 % Copyright (c) 2009, Dr. Vladimir Bondarenko <http://sites.google.com/site/bondsite>
 
 % Check input for sanity:
-error(nargchk(1,2,nargin));
-error(nargoutchk(0,1,nargout));
+narginchk(1,2);
+nargoutchk(0,1);
 
 % Defaults:
 if nargin==1, lType = 'k1--'; end

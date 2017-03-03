@@ -25,8 +25,8 @@ function varargout = drawSegment(Points, lType)
 % Copyright (c) 2009, Dr. Vladimir Bondarenko <http://sites.google.com/site/bondsite>
 
 % Check input for sanity:
-error(nargchk(1,2,nargin));
-error(nargoutchk(0,1,nargout));
+narginchk(1,2);
+nargoutchk(0,1);
 % Parse the input:
 if nargin==1 
     lColor = 'k'; lStyle = '--'; lWidth = 1; lMarker = 'none';
