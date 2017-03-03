@@ -153,7 +153,7 @@ classdef RoI1 < handle
         function roi1_wbmcb(r1,~,~, dx)
             if r1.lineIx
                 roi_width = diff(r1.rng);
-                cpos = get(gca, 'currentPoint');
+                cpos = get(r1.hax, 'currentPoint');
                 r1.rng(r1.lineIx) = cpos(1,1) + dx;
                 % Update plot:
                 set(r1.hline(r1.lineIx), 'xdata', [1 1]*r1.rng(r1.lineIx));
