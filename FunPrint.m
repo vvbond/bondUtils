@@ -76,7 +76,7 @@ classdef FunPrint < handle
         % sprintf with variable number of input arguments.
             
             % Sanity check:
-            narginchk(1, inf);
+            narginchk(1, 2);
             if nargin == 1, vars = []; end
             
             switch length(vars)
