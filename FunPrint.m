@@ -4,8 +4,10 @@ classdef FunPrint < handle
 % Usage: fprint = FunPrint; frpint.over(format, data)
 %  where format and data are the same as in fprintf().
 %
-% Example:
+% Examples:
 %  fprint = FunPrint; for ii=1:10, fprint.over('Item %d (%d)\n', ii, 10); pause(.3); end
+%  a = rand(1,3); FunPrint.vector('A random vector: %1.2f\n', a);
+
     properties (Hidden)
         bspStr = sprintf('\b');
         backspace;
@@ -63,7 +65,7 @@ classdef FunPrint < handle
             % Construct the final string:
             msg_ = '';
             for ii=1:length(frmts)
-                msg_ = [msg_ msg_split{ii} frmts{ii}];
+                msg_ = [msg_ msg_split{ii} frmts{ii}]; %#ok<*AGROW>
             end
             msg_ = [msg_ msg_split{end}];
             
