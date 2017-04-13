@@ -17,7 +17,6 @@ classdef IBezier3 < handle
         n = 2000
         hline
         hwhisker
-        hfig
         hax
     end
     
@@ -45,22 +44,21 @@ classdef IBezier3 < handle
             if nargin
                 val = varargin{1};
                 if isa(val, 'IPoint') && numel(val) <= 4
-                    ibz.cpt = val;
+                    cpt = val;
                 elseif ismatrix(val) && size(val,2) <= 4
                     for ii=1:size(val,2)
                         cpt(ii) = IPoint(val(:,ii)); %#ok<*AGROW>
                     end
-                    ibz.cpt = cpt;
                 end
             end
             
-            if length(ibz.cpt) < 4
-                for ii=length(ibz.cpt)+1:4
-                    ibz.cpt(ii) = IPoint; %#ok<*AGROW>
+            if length(cpt) < 4
+                for ii=length(cpt)+1:4
+                    cpt(ii) = IPoint; %#ok<*AGROW>
                 end
             end
+            ibz.cpt = cpt;
             ibz.t = linspace(0,1, ibz.n);
-            ibz.hfig = gcf;
             ibz.hax = gca;
             ibz.compute_line;
             ibz.plot;
@@ -79,7 +77,7 @@ classdef IBezier3 < handle
         function delete(ibz)
             delete(ibz.cpt);
             delete(ibz.hline);
-            delete(ibz.hwhisker);
+            if all(ishandle(ibz.hwhisker)), delete(ibz.hwhisker); end
         end
     end
     
@@ -121,10 +119,21 @@ classdef IBezier3 < handle
             ibz.l = ibz.point(t);
         end
     end
+    
     %% Plotting & interaction
     methods
         function plot(ibz)
-            figure(ibz.hfig); hold on
+            figure(gcf);
+            for ii=1:4
+                try 
+                    if isempty(ibz.cpt(ii).hp.Parent) || isempty(ibz.cpt(ii).hp.Parent.Parent)
+                        ibz.cpt(ii).plot; 
+                    end
+                catch
+                    ibz.cpt(ii).plot;
+                end
+            end
+            hold on
             ibz.hline = plot(ibz.l(1,:), ibz.l(2,:));
             ibz.hwhisker(1) = plot([ibz.cpt(1).p(1) ibz.cpt(2).p(1)], [ibz.cpt(1).p(2) ibz.cpt(2).p(2)], 'k--');
             ibz.hwhisker(2) = plot([ibz.cpt(3).p(1) ibz.cpt(4).p(1)], [ibz.cpt(3).p(2) ibz.cpt(4).p(2)], 'k--');

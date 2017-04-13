@@ -1,41 +1,44 @@
 classdef IPoint < handle
+    
+    properties(SetObservable)
+        p           % 2-vector of [x;y] coordinates.
+    end
+    
     properties
-        p
         marker = 'o'
         faceColor
     end
     
+    properties(Dependent)
+        delta
+    end
+    
     properties(Hidden)
-        hfig
+        p_old
         hp
         oldButtonMotionFcn
         oldButtonUpFcn
         user_bmcb = {}
         user_bdcb = {}
     end
+    
     methods
         %% {Con, De}structor
         function ipt = IPoint(varargin)
             
-            ipt.hfig = gcf;
             if nargin
                 switch nargin
                     case 1
-                        ipt.p = varargin{1};
+                        ipt.p = varargin{1}(:);
                     case 2
                         ipt.p = varargin{1};
                         ipt.marker = varargin{2};  
                 end
             else
-                figure(ipt.hfig);
                 ipt.p = ginput(1)';
             end
-            figure(ipt.hfig); hold on
-            ipt.hp = plot(ipt.p(1), ipt.p(2), ipt.marker);
-            hold off
-            
-            % Interactive callbacks:
-            set(ipt.hp, 'ButtonDownFcn', @(src,evt) bdcb(ipt, src, evt));
+            ipt.p_old = ipt.p;
+            ipt.plot();
         end
         
         function delete(ipt)
@@ -76,8 +79,23 @@ classdef IPoint < handle
     
     %% Plotting
     methods
+        function plot(ipt)
+            figure(gcf); hold on
+            ipt.hp = plot(ipt.p(1), ipt.p(2), ipt.marker);
+            hold off
+            
+            % Interactive callbacks:
+            set(ipt.hp, 'ButtonDownFcn', @(src,evt) bdcb(ipt, src, evt));
+            addlistener(ipt, 'p', 'PreSet', @(src,evt) p_PreSet_cb(ipt, src, evt));
+            addlistener(ipt, 'p', 'PostSet', @(src,evt) p_PostSet_cb(ipt, src, evt) );
+        end
+        
         function updatePlot(ipt)
             set(ipt.hp, 'XData', ipt.p(1), 'YData', ipt.p(2));
+        end
+        
+        function val = get.delta(ipt)
+            val = ipt.p - ipt.p_old;
         end
     end
        
@@ -89,8 +107,8 @@ classdef IPoint < handle
             ipt.oldButtonUpFcn      = get(gcf, 'WindowButtonUpFcn');
             
             % Set new interaction callbacks:
-            set(ipt.hfig, 'WindowButtonMotionFcn', @(src,evt) wbmcb(ipt, src, evt),...
-                          'WindowButtonUpFcn',     @(src,evt) wbucb(ipt, src, evt));
+            set(gcf, 'WindowButtonMotionFcn', @(src,evt) wbmcb(ipt, src, evt),...
+                     'WindowButtonUpFcn',     @(src,evt) wbucb(ipt, src, evt));
             for ii=1:length(ipt.user_bdcb)
                 ipt.user_bdcb{ii}(ipt);
             end
@@ -100,7 +118,7 @@ classdef IPoint < handle
         function wbmcb(ipt, ~,~)
             cpos = get(gca, 'CurrentPoint');
             ipt.p = cpos(1,1:2)';
-            ipt.updatePlot();
+%             ipt.updatePlot();
             for ii=1:length(ipt.user_bmcb)
                 ipt.user_bmcb{ii}(ipt);
             end
@@ -111,5 +129,14 @@ classdef IPoint < handle
             set(gcf, 'WindowButtonMotionFcn', ipt.oldButtonMotionFcn,...
                      'WindowButtonUpFcn',     ipt.oldButtonUpFcn);
         end
+        
+         function p_PreSet_cb(ipt, ~, ~)
+             ipt.p_old = ipt.p;
+         end
+
+        function p_PostSet_cb(ipt, ~, ~)
+            ipt.updatePlot;
+        end
+       
     end
 end
