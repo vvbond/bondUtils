@@ -14,7 +14,7 @@ classdef IBezier3 < handle
     
     properties(Hidden)
         t
-        n = 2000
+        n = 1000
         hline
         hwhisker
         hax
@@ -50,6 +50,8 @@ classdef IBezier3 < handle
                         cpt(ii) = IPoint(val(:,ii)); %#ok<*AGROW>
                     end
                 end
+            else
+                cpt = IPoint;
             end
             
             if length(cpt) < 4

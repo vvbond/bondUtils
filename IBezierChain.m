@@ -21,10 +21,14 @@ classdef IBezierChain < handle
     %% {Con,De}structor
     methods        
         function bzch = IBezierChain(segment)
-            if isa(segment, 'IBezier3')
-                bzch.segment = segment;
+            if nargin
+                if isa(segment, 'IBezier3')
+                    bzch.segment = segment;
+                else
+                    error('Wrong argument type. Must be an IBezier3 segment.');
+                end
             else
-                error('Wrong argument type. Must be an IBezier3 segment.');
+                bzch.segment = IBezier3;
             end
         end
         
@@ -65,29 +69,7 @@ classdef IBezierChain < handle
             % Add central point constraint:
             bzch.segment(k).cpt(4).user_bmcb{2} = @(ipt) smooth_junction_centre_constraint(bzch, k, k+1, ipt);
         end
-        
-        function smooth_junction_symmetry_constraint(bzch, seg1, seg2, ~)
-            if seg2 > seg1
-                bzch.segment(seg2).cpt(2).p = 2*bzch.segment(seg1).cpt(4).p - bzch.segment(seg1).cpt(3).p;
-            else
-                bzch.segment(seg2).cpt(3).p = 2*bzch.segment(seg1).cpt(1).p - bzch.segment(seg1).cpt(2).p;
-            end
-            bzch.segment(seg2).compute_line;
-            bzch.segment(seg2).update_plot;
-        end
-        
-        function smooth_junction_centre_constraint(bzch, seg1, seg2, ipt)
-            bzch.segment(seg1).cpt(3).p = bzch.segment(seg1).cpt(3).p + ipt.delta;
-            bzch.segment(seg2).cpt(2).p = bzch.segment(seg2).cpt(2).p + ipt.delta;
-            bzch.segment(seg2).compute_line;
-            bzch.segment(seg2).update_plot;
-        end
-        
-        function corner_junction_centre_constraint(bzch, seg2, ~)
-            bzch.segment(seg2).compute_line;
-            bzch.segment(seg2).update_plot;
-        end
-        
+                
         function junction_corner(bzch, k)
             if nargin==1, k=1; end
             bzch.segment(k).cpt(4).user_bmcb{2} = @(ipt) corner_junction_centre_constraint(bzch, k+1, ipt);
@@ -153,6 +135,31 @@ classdef IBezierChain < handle
     methods
         function n = get.n(bzch)
             n = length(bzch.segment);
+        end
+    end
+    
+    %% Inner kitchen
+    methods(Hidden)
+        function smooth_junction_symmetry_constraint(bzch, seg1, seg2, ~)
+            if seg2 > seg1
+                bzch.segment(seg2).cpt(2).p = 2*bzch.segment(seg1).cpt(4).p - bzch.segment(seg1).cpt(3).p;
+            else
+                bzch.segment(seg2).cpt(3).p = 2*bzch.segment(seg1).cpt(1).p - bzch.segment(seg1).cpt(2).p;
+            end
+            bzch.segment(seg2).compute_line;
+            bzch.segment(seg2).update_plot;
+        end
+        
+        function smooth_junction_centre_constraint(bzch, seg1, seg2, ipt)
+            bzch.segment(seg1).cpt(3).p = bzch.segment(seg1).cpt(3).p + ipt.delta;
+            bzch.segment(seg2).cpt(2).p = bzch.segment(seg2).cpt(2).p + ipt.delta;
+            bzch.segment(seg2).compute_line;
+            bzch.segment(seg2).update_plot;
+        end
+        
+        function corner_junction_centre_constraint(bzch, seg2, ~)
+            bzch.segment(seg2).compute_line;
+            bzch.segment(seg2).update_plot;
         end
     end
 end
