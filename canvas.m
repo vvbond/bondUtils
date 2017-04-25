@@ -1,5 +1,10 @@
-function canvas(scale_factor)
-    if nargin==0, scale_factor = 10; end
-    axis([0 1 0 1]*scale_factor);
+function canvas(xscale, yscale)
+    switch nargin
+        case 0
+            xscale = 10; yscale = 10; 
+        case 1
+            yscale = xscale;
+    end
+    axis([0 xscale 0 yscale]);
     grid on; box on
 end
