@@ -12,6 +12,11 @@ classdef IBezierChain < handle
     properties
         segment
     end
+    properties(SetObservable)
+        color
+        width
+        style
+    end
     
     properties(Dependent)
         l
@@ -48,6 +53,9 @@ classdef IBezierChain < handle
             for ii=1:bzch.n
                 bzch.segment(ii).plot;
             end
+            addlistener(bzch, 'width', 'PostSet', @(src,evt) width_PostSet_cb(bzch, src, evt) );
+            addlistener(bzch, 'color', 'PostSet', @(src,evt) color_PostSet_cb(bzch, src, evt) );
+            addlistener(bzch, 'style', 'PostSet', @(src,evt) style_PostSet_cb(bzch, src, evt) );            
         end
         
         function toggle_controls(bzch)
@@ -89,7 +97,8 @@ classdef IBezierChain < handle
                
         function len = curve_length(bzch, p1, p2)
         % Length of the curve between points p0 and p1. 
-        % The points are parametrized as 2-vectors: [segment t].
+        % The points are parametrized as 2-vectors: [segment t], where segment is the segment number counting from 1, 
+        % and t is the curve parametrization value ranging from 0 to 1.
    
             switch nargin
                 case 1
@@ -161,5 +170,23 @@ classdef IBezierChain < handle
             bzch.segment(seg2).compute_line;
             bzch.segment(seg2).update_plot;
         end
+        
+        function width_PostSet_cb(bzch, ~, ~)
+            for ii=1:bzch.n
+                bzch.segment(ii).width = bzch.width;
+            end
+        end
+        
+        function color_PostSet_cb(bzch, ~, ~)
+            for ii=1:bzch.n
+                bzch.segment(ii).color = bzch.color;
+            end
+        end
+
+        function style_PostSet_cb(bzch, ~, ~)
+            for ii=1:bzch.n
+                bzch.segment(ii).style = bzch.style;
+            end
+        end       
     end
 end

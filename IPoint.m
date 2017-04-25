@@ -1,11 +1,17 @@
 classdef IPoint < handle
-    
+% Interactive 2D point.
+%
+% Features:
+%  drug-and-drop
+%  change programmatically: position, marker, face color.
+%
+% Usage:
+%  figure; axis(axis*10); ipt = IPoint;
+
     properties(SetObservable)
-        p           % 2-vector of [x;y] coordinates.
-    end
-    
-    properties
+        p                   % 2-vector of [x;y] coordinates.
         marker = 'o'
+        color
         faceColor
     end
     
@@ -86,14 +92,13 @@ classdef IPoint < handle
             
             % Interactive callbacks:
             set(ipt.hp, 'ButtonDownFcn', @(src,evt) bdcb(ipt, src, evt));
-            addlistener(ipt, 'p', 'PreSet', @(src,evt) p_PreSet_cb(ipt, src, evt));
+            addlistener(ipt, 'p', 'PreSet',  @(src,evt) p_PreSet_cb(ipt, src, evt));
             addlistener(ipt, 'p', 'PostSet', @(src,evt) p_PostSet_cb(ipt, src, evt) );
+            addlistener(ipt, 'marker',    'PostSet', @(src,evt) marker_PostSet_cb(ipt, src, evt) );
+            addlistener(ipt, 'color',     'PostSet', @(src,evt) color_PostSet_cb(ipt, src, evt) );
+            addlistener(ipt, 'faceColor', 'PostSet', @(src,evt) faceColor_PostSet_cb(ipt, src, evt) );
         end
-        
-        function updatePlot(ipt)
-            set(ipt.hp, 'XData', ipt.p(1), 'YData', ipt.p(2));
-        end
-        
+                
         function val = get.delta(ipt)
             val = ipt.p - ipt.p_old;
         end
@@ -101,6 +106,10 @@ classdef IPoint < handle
        
     %% Interactivity
     methods(Hidden)
+        function updatePlot(ipt)
+            set(ipt.hp, 'XData', ipt.p(1), 'YData', ipt.p(2));
+        end
+
         function bdcb(ipt, ~,~)
             % Store old interaction callbacks:
             ipt.oldButtonMotionFcn  = get(gcf, 'WindowButtonMotionFcn');
@@ -138,5 +147,18 @@ classdef IPoint < handle
             ipt.updatePlot;
         end
        
+        function marker_PostSet_cb(ipt, src, evt)
+            set(ipt.hp, 'marker', ipt.marker);
+        end
+        
+        function color_PostSet_cb(ipt, src, evt)
+            set(ipt.hp, 'color', ipt.color);
+        end
+
+        
+        function faceColor_PostSet_cb(ipt, src, evt)
+            set(ipt.hp, 'MarkerFaceColor', ipt.faceColor);
+        end
+
     end
 end

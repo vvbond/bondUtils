@@ -8,8 +8,14 @@ classdef IBezier3 < handle
 % See also: IBezierChain, IPoint.
 
     properties
-        cpt     % control points.
-        l       % line points.
+        cpt             % control points.
+        l               % 2-by-n array of [x; y] coordinates of n points representing the Bezier line.
+    end
+    
+    properties(SetObservable)
+        width = 1
+        color
+        style
     end
     
     properties(Hidden)
@@ -101,7 +107,7 @@ classdef IBezier3 < handle
                     tend   = 1;
                 case 2
                     tstart = 0;
-                    tend = t1;
+                    tend   = t1;
                 case 3
                     tstart = t1;
                     tend   = t2;
@@ -126,6 +132,7 @@ classdef IBezier3 < handle
     methods
         function plot(ibz)
             figure(gcf);
+            % Plot the control points, if yet not plotted:
             for ii=1:4
                 try 
                     if isempty(ibz.cpt(ii).hp.Parent) || isempty(ibz.cpt(ii).hp.Parent.Parent)
@@ -135,10 +142,23 @@ classdef IBezier3 < handle
                     ibz.cpt(ii).plot;
                 end
             end
+            % Plot the line:
             hold on
-            ibz.hline = plot(ibz.l(1,:), ibz.l(2,:));
+            ibz.hline = plot(ibz.l(1,:), ibz.l(2,:), 'LineWidth', ibz.width);
+            if ~isempty(ibz.color)
+                set(ibz.hline, 'color', ibz.color);
+            end
+            if ~isempty(ibz.style)
+                set(ibz.hline, 'LineStyle', ibz.style);
+            end
+
+            addlistener(ibz, 'color', 'PostSet', @(src,evt) color_PostSet_cb(ibz, src, evt) );
+            addlistener(ibz, 'width', 'PostSet', @(src,evt) width_PostSet_cb(ibz, src, evt) );
+            addlistener(ibz, 'style', 'PostSet', @(src,evt) style_PostSet_cb(ibz, src, evt) );
+            % Add whiskers:
             ibz.hwhisker(1) = plot([ibz.cpt(1).p(1) ibz.cpt(2).p(1)], [ibz.cpt(1).p(2) ibz.cpt(2).p(2)], 'k--');
             ibz.hwhisker(2) = plot([ibz.cpt(3).p(1) ibz.cpt(4).p(1)], [ibz.cpt(3).p(2) ibz.cpt(4).p(2)], 'k--');
+            % Make line non-responsive to mouse clicks:
             set(ibz.hline, 'PickableParts', 'none');
             set(ibz.hwhisker, 'PickableParts', 'none');
         end
@@ -162,5 +182,21 @@ classdef IBezier3 < handle
             ibz.compute_line;
             ibz.update_plot;
         end
+    end
+    
+    %% Auxiliary methods
+    methods(Hidden)
+        function color_PostSet_cb(ibz, ~, ~)
+            set(ibz.hline, 'color', ibz.color);
+        end
+        
+        function width_PostSet_cb(ibz, ~, ~)
+            set(ibz.hline, 'LineWidth', ibz.width);
+        end
+
+        function style_PostSet_cb(ibz, ~, ~)
+            set(ibz.hline, 'LineStyle', ibz.style);
+        end
+
     end
 end
