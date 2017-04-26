@@ -138,6 +138,18 @@ classdef IBezierChain < handle
                 len = len1 + len2 + len3;
             end
         end
+        
+        function [segnum, t, s, nn, d] =  nearest_neighbour(bzch, pp)
+            for k=1:bzch.n
+                [segt(k), ~, ~, segd(k)] = bzch.segment(k).nearest_neighbour(pp); %#ok<AGROW>
+            end
+            [dmin, ixmin] = min(segd);
+            segnum = ixmin;
+            t = segt(ixmin);
+            d = dmin;
+            s = bzch.curve_length([segnum t]);
+            nn = bzch.segment(segnum).point(t);
+        end
     end
     
     %% Auxliary methods

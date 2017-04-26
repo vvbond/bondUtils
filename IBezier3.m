@@ -13,6 +13,7 @@ classdef IBezier3 < handle
     end
     
     properties(SetObservable)
+        n = 1000
         width = 1
         color
         style
@@ -20,7 +21,6 @@ classdef IBezier3 < handle
     
     properties(Hidden)
         t
-        n = 1000
         hline
         hwhisker
         hax
@@ -67,10 +67,11 @@ classdef IBezier3 < handle
             end
             ibz.cpt = cpt;
             ibz.t = linspace(0,1, ibz.n);
-            ibz.hax = gca;
             ibz.compute_line;
+            ibz.hax = gca;
             ibz.plot;
-            
+                        
+            addlistener(ibz, 'n', 'PostSet', @(src,evt) n_PostSet_cb(ibz, src, evt));
             % Setup user-interaction:
             for ii=1:4
                 % A control point can refer to two Bezier segments.
@@ -89,10 +90,22 @@ classdef IBezier3 < handle
         end
     end
     
+    %% Static methods
+    methods(Static)
+        function ibz = loadobj(ibz)
+            addlistener(ibz, 'n', 'PostSet', @(src,evt) n_PostSet_cb(ibz, src, evt));
+        end
+    end
+    
     %% Computations
     methods
         function p = point(ibz, t)
             p = (1-t).^3.*ibz.cpt(1) + 3*(1-t).^2.*t.*ibz.cpt(2) + 3*(1-t).*t.^2.*ibz.cpt(3) + t.^3.*ibz.cpt(4);
+        end
+        
+        function compute_line(ibz)
+            t = ibz.t; %#ok<*PROP>
+            ibz.l = ibz.point(t);
         end
         
         function dpdt = derivative(ibz,t)
@@ -100,7 +113,7 @@ classdef IBezier3 < handle
         end
         
         function len = curve_length(ibz, t1, t2)
-        % Length of the curve segment.
+        % Length of the curve segment between points parametrized by t1 and t2.
             switch nargin
                 case 1
                     tstart = 0;
@@ -122,9 +135,39 @@ classdef IBezier3 < handle
             end
         end
         
-        function compute_line(ibz)
-            t = ibz.t; %#ok<*PROP>
-            ibz.l = ibz.point(t);
+        function [t0, p0] = point_given_length(ibz, s0)
+        % Find a point on the curve given the curve length from the origin to the point. 
+            
+            f = @(t) ibz.curve_length(t) - s0;
+            t0 = fzero(f, .5);
+            p0 = ibz.point(t0);
+        end
+               
+        function [t, s, nn, d] = nearest_neighbour(ibz, pp)
+        % Find a point on the Bezier curve nearest to the given point pp.
+            
+            % Parse input:
+            if isvector(pp)
+                pp = pp(:);
+            end
+            
+            % Init:
+            nPoints = size(pp, 2);
+            d = zeros(1,nPoints);
+            t = zeros(1,nPoints);
+            nn = zeros(2,nPoints);
+            
+            % Find the nearest neighbor and distance to it:
+            for ii=1:nPoints
+                p = pp(:,ii);
+                delta = p*ones(1, ibz.n) - ibz.l;
+                dist = sqrt(sum(delta.^2));
+                [dmin, ixmin] = min(dist);
+                d(ii) = dmin;
+                t(ii) = ibz.t(ixmin);
+                s(ii) = ibz.curve_length(t(ii));
+                nn(:,ii) = ibz.point(t(ii));
+            end
         end
     end
     
@@ -171,7 +214,7 @@ classdef IBezier3 < handle
         
         function toggle_controls(ibz)
             onoff = get(ibz.cpt(2).hp, 'visible');
-            if strcmpi(onoff, 'off') onoff = 'on'; else onoff = 'off'; end
+            if strcmpi(onoff, 'off'), onoff = 'on'; else, onoff = 'off'; end
             for ii=1:4
                 set(ibz.cpt(ii).hp, 'visible', onoff);
             end
@@ -186,6 +229,11 @@ classdef IBezier3 < handle
     
     %% Auxiliary methods
     methods(Hidden)
+        function n_PostSet_cb(ibz, src, evt)
+            ibz.t = linspace(0,1, ibz.n);
+            ibz.compute_line;
+        end
+        
         function color_PostSet_cb(ibz, ~, ~)
             set(ibz.hline, 'color', ibz.color);
         end
