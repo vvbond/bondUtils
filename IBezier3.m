@@ -162,15 +162,22 @@ classdef IBezier3 < handle
             % Find the nearest neighbor and distance to it:
             for ii=1:nPoints
                 p = pp(:,ii);
-                delta = p*ones(1, ibz.n) - ibz.l;
-                dist = sqrt(sum(delta.^2));
-                [dmin, ixmin] = min(dist);
-                d(ii) = dmin;
-                t(ii) = ibz.t(ixmin);
+                
+            % Direct search:
+%                 delta = p*ones(1, ibz.n) - ibz.l;
+%                 dist = sqrt(sum(delta.^2));
+%                 [dmin, ixmin] = min(dist);
+%                 d(ii) = dmin;
+%                 t(ii) = ibz.t(ixmin);
+
+            % Minimization:
+                distFun = @(t) norm(ibz.point(t) - p);
+                [t(ii), d(ii)] = fminbnd(distFun, 0, 1);
+
                 s(ii) = ibz.curve_length(t(ii));
                 nn(:,ii) = ibz.point(t(ii));
             end
-        end
+        end        
     end
     
     %% Plotting & interaction
