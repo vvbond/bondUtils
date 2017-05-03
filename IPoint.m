@@ -29,7 +29,7 @@ classdef IPoint < handle
     end
     
     methods
-        %% {Con, De}structor
+        %% {Con,De}structor
         function ipt = IPoint(varargin)
             
             if nargin
@@ -154,8 +154,7 @@ classdef IPoint < handle
         function color_PostSet_cb(ipt, src, evt)
             set(ipt.hp, 'color', ipt.color);
         end
-
-        
+ 
         function faceColor_PostSet_cb(ipt, src, evt)
             set(ipt.hp, 'MarkerFaceColor', ipt.faceColor);
         end
