@@ -40,6 +40,11 @@ classdef IBezierChain < handle
             else
                 bzch.segment = IBezier3;
             end
+            
+            % Listeners:
+            addlistener(bzch, 'width', 'PostSet', @(src,evt) width_PostSet_cb(bzch, src, evt) );
+            addlistener(bzch, 'color', 'PostSet', @(src,evt) color_PostSet_cb(bzch, src, evt) );
+            addlistener(bzch, 'style', 'PostSet', @(src,evt) style_PostSet_cb(bzch, src, evt) );            
         end
         
         function delete(bzch)
@@ -58,9 +63,6 @@ classdef IBezierChain < handle
             for ii=1:bzch.n
                 bzch.segment(ii).plot;
             end
-            addlistener(bzch, 'width', 'PostSet', @(src,evt) width_PostSet_cb(bzch, src, evt) );
-            addlistener(bzch, 'color', 'PostSet', @(src,evt) color_PostSet_cb(bzch, src, evt) );
-            addlistener(bzch, 'style', 'PostSet', @(src,evt) style_PostSet_cb(bzch, src, evt) );            
         end
         
         function toggle_controls(bzch)
