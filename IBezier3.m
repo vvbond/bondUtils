@@ -26,7 +26,7 @@ classdef IBezier3 < handle
         hax
     end
     
-    %% {Con, De}structor
+    %% {Con,De}structor
     methods
         function ibz = IBezier3(varargin)
         % Create a cubic Bezier curve in 2D.
@@ -70,8 +70,10 @@ classdef IBezier3 < handle
             ibz.compute_line;
             ibz.hax = gca;
             ibz.plot;
-                        
+            
+            % Listeners:
             addlistener(ibz, 'n', 'PostSet', @(src,evt) n_PostSet_cb(ibz, src, evt));
+            
             % Setup user-interaction:
             for ii=1:4
                 % A control point can refer to two Bezier segments.
@@ -112,7 +114,7 @@ classdef IBezier3 < handle
             dpdt = 3*(1-t).^2.*(ibz.cpt(2)-ibz.cpt(1)) + 6*(1-t).*t.*(ibz.cpt(3)-ibz.cpt(2)) + 3*t.^2.*(ibz.cpt(4)-ibz.cpt(3));
         end
         
-        function len = curve_length(ibz, t1, t2)
+        function len = curve_length(ibz, varargin)
         % Length of the curve segment between points parametrized by t1 and t2.
             switch nargin
                 case 1
@@ -120,10 +122,10 @@ classdef IBezier3 < handle
                     tend   = 1;
                 case 2
                     tstart = 0;
-                    tend   = t1;
+                    tend   = varargin{1};
                 case 3
-                    tstart = t1;
-                    tend   = t2;
+                    tstart = varargin{1};
+                    tend   = varargin{2};
             end
             
             ds = @(t) sqrt(sum(ibz.derivative(t).^2));
