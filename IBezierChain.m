@@ -25,12 +25,17 @@ classdef IBezierChain < handle
     
     %% {Con,De}structor
     methods        
-        function bzch = IBezierChain(segment)
+        function bzch = IBezierChain(varargin)
+        % Input can be either an IBezier3 object (segment), or a set of control
+        % points.
+
+            narginchk(0,1);
             if nargin
-                if isa(segment, 'IBezier3')
-                    bzch.segment = segment;
+                val = varargin{1};
+                if isa(val, 'IBezier3')
+                    bzch.segment = val;
                 else
-                    error('Wrong argument type. Must be an IBezier3 segment.');
+                    bzch.segment = IBezier3(val);
                 end
             else
                 bzch.segment = IBezier3;
