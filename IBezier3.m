@@ -8,15 +8,15 @@ classdef IBezier3 < handle
 % See also: IBezierChain, IPoint.
 
     properties
-        cpt             % control points.
         l               % 2-by-n array of [x; y] coordinates of n points representing the Bezier line.
     end
     
     properties(SetObservable)
-        n = 1000
-        width = 1
-        color
-        style
+        cpt             % control points.
+        n = 1000        % discretization parameter, i.e., number of points.
+        width = 1       % line width.
+        color           % line color.
+        style           % line style.
     end
     
     properties(Hidden)
@@ -73,6 +73,7 @@ classdef IBezier3 < handle
             
             % Listeners:
             addlistener(ibz, 'n', 'PostSet', @(src,evt) n_PostSet_cb(ibz, src, evt));
+            addlistener(cpt, 'pChange', @(src,evt) cpt_PostSet_cb(ibz, src, evt));
             
             % Setup user-interaction:
             for ii=1:4
@@ -238,10 +239,16 @@ classdef IBezier3 < handle
     
     %% Auxiliary methods
     methods(Hidden)
-        function n_PostSet_cb(ibz, src, evt)
+        function n_PostSet_cb(ibz, ~, ~)
             ibz.t = linspace(0,1, ibz.n);
             ibz.compute_line;
         end
+        
+        function cpt_PostSet_cb(ibz, ~, ~)
+            ibz.compute_line;
+            ibz.update_plot;
+        end
+
         
         function color_PostSet_cb(ibz, ~, ~)
             set(ibz.hline, 'color', ibz.color);

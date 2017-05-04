@@ -28,6 +28,10 @@ classdef IPoint < handle
         user_bdcb = {}
     end
     
+    events
+        pChange
+    end
+    
     methods
         %% {Con,De}structor
         function ipt = IPoint(varargin)
@@ -35,7 +39,7 @@ classdef IPoint < handle
             if nargin
                 switch nargin
                     case 1
-                        ipt.p = varargin{1}(:);
+                        ipt.p = varargin{1};
                     case 2
                         ipt.p = varargin{1};
                         ipt.marker = varargin{2};  
@@ -83,6 +87,18 @@ classdef IPoint < handle
         end
     end
     
+    %% Setters & Getters
+    methods
+        function set.p(ipt, val)
+            if ~isvector(val) || numel(val)~=2, error('Value must be a 2-vector.'); end
+            ipt.p = val(:);
+        end
+        
+        function val = get.delta(ipt)
+            val = ipt.p - ipt.p_old;
+        end
+    end
+    
     %% Plotting
     methods
         function plot(ipt)
@@ -97,11 +113,7 @@ classdef IPoint < handle
             addlistener(ipt, 'marker',    'PostSet', @(src,evt) marker_PostSet_cb(ipt, src, evt) );
             addlistener(ipt, 'color',     'PostSet', @(src,evt) color_PostSet_cb(ipt, src, evt) );
             addlistener(ipt, 'faceColor', 'PostSet', @(src,evt) faceColor_PostSet_cb(ipt, src, evt) );
-        end
-                
-        function val = get.delta(ipt)
-            val = ipt.p - ipt.p_old;
-        end
+        end                
     end
        
     %% Interactivity
@@ -145,8 +157,9 @@ classdef IPoint < handle
 
         function p_PostSet_cb(ipt, ~, ~)
             ipt.updatePlot;
+            notify(ipt, 'pChange');
         end
-       
+              
         function marker_PostSet_cb(ipt, src, evt)
             set(ipt.hp, 'marker', ipt.marker);
         end
