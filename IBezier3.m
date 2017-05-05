@@ -115,6 +115,10 @@ classdef IBezier3 < handle
             dpdt = 3*(1-t).^2.*(ibz.cpt(2)-ibz.cpt(1)) + 6*(1-t).*t.*(ibz.cpt(3)-ibz.cpt(2)) + 3*t.^2.*(ibz.cpt(4)-ibz.cpt(3));
         end
         
+        function c = curvature(ibz, t)
+            c = 6*(1-t).*(ibz.cpt(3)-2*ibz.cpt(2)+ibz.cpt(1)) + 6*t.*(ibz.cpt(4)-2*ibz.cpt(3)+ibz.cpt(2));
+        end
+        
         function len = curve_length(ibz, varargin)
         % Length of the curve segment between points parametrized by t1 and t2.
             switch nargin
