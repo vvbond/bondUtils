@@ -52,6 +52,15 @@ classdef IBezierChain < handle
         end
     end
     
+    %% Static methods
+    methods(Static)
+        function bzch = loadobj(bzch)
+            addlistener(bzch, 'width', 'PostSet', @(src,evt) width_PostSet_cb(bzch, src, evt) );
+            addlistener(bzch, 'color', 'PostSet', @(src,evt) color_PostSet_cb(bzch, src, evt) );
+            addlistener(bzch, 'style', 'PostSet', @(src,evt) style_PostSet_cb(bzch, src, evt) );
+        end
+    end
+    
     %% Segments
     methods
         function add_segment(bzch)
