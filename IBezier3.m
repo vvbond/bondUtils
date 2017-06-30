@@ -225,8 +225,22 @@ classdef IBezier3 < handle
             set(ibz.hwhisker(1), 'xdata', [ibz.cpt(1).p(1) ibz.cpt(2).p(1)], 'ydata', [ibz.cpt(1).p(2) ibz.cpt(2).p(2)]);
             set(ibz.hwhisker(2), 'xdata', [ibz.cpt(3).p(1) ibz.cpt(4).p(1)], 'ydata', [ibz.cpt(3).p(2) ibz.cpt(4).p(2)]);
         end
+
+        function controls_off(ibz)
+            for ii=1:4
+                set(ibz.cpt(ii).hp, 'visible', 'off');
+            end
+            set(ibz.hwhisker, 'visible', 'off');
+        end
+
+        function controls_on(ibz)
+            for ii=1:4
+                set(ibz.cpt(ii).hp, 'visible', 'on');
+            end
+            set(ibz.hwhisker, 'visible', 'on');
+        end
         
-        function toggle_controls(ibz)
+        function controls_toggle(ibz)
             onoff = get(ibz.cpt(2).hp, 'visible');
             if strcmpi(onoff, 'off'), onoff = 'on'; else, onoff = 'off'; end
             for ii=1:4

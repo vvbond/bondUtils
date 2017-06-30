@@ -73,10 +73,22 @@ classdef IBezierChain < handle
                 bzch.segment(ii).plot;
             end
         end
-        
-        function toggle_controls(bzch)
+
+        function controls_on(bzch)
             for ii=1:bzch.n
-                bzch.segment(ii).toggle_controls;
+                bzch.segment(ii).controls_on;
+            end
+        end
+
+        function controls_off(bzch)
+            for ii=1:bzch.n
+                bzch.segment(ii).controls_off;
+            end
+        end
+        
+        function controls_toggle(bzch)
+            for ii=1:bzch.n
+                bzch.segment(ii).controls_toggle;
             end
         end
         
