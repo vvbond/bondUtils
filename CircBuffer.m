@@ -2,12 +2,12 @@ classdef CircBuffer < handle
 % Class implementing a circular buffer for arrays.
 %
 % Usage: 
-%  bfr = FIFOBuffer(elsz, numels);  % Create a buffer.
+%  bfr = CircBuffer(elsz, numels);  % Create a buffer.
 %  bfr.push(el);                    % Push an element to the buffer.
 %  D = bfr.data;                    % Fetch buffer data.    
 %
 % Examples:
-%   bfr = FIFOBuffer([1 1], 10); for ii=1:13, bfr.push(rand); disp(bfr.data); end
+%   bfr = CircBuffer([1 1], 10); for ii=1:13, bfr.push(rand); disp(bfr.data); end
 
     properties
         elsz                % {2,3}-vector describing the size of indivudual elements in the buffer.
@@ -24,7 +24,7 @@ classdef CircBuffer < handle
     
     methods
         %% {Con,De}structor
-        function bfr = FIFOBuffer(elsz, numels)
+        function bfr = CircBuffer(elsz, numels)
             bfr.numels = numels;
             bfr.elsz = elsz;
             % Init:
