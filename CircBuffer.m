@@ -1,5 +1,5 @@
-classdef FIFOBuffer < handle
-% Class implementing a fixed-size FIFO buffer for arrays.
+classdef CircBuffer < handle
+% Class implementing a circular buffer for arrays.
 %
 % Usage: 
 %  bfr = FIFOBuffer(elsz, numels);  % Create a buffer.
