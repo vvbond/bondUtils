@@ -1,7 +1,5 @@
 classdef RoI2 < handle
     % Interactive tool for specifying a 2D region of interest (ROI).
-    %
-    
     
     %% 23-Apr-2015
     %% (c) Vladimir Bondarenko, http://www.mathworks.co.uk/matlabcentral/fileexchange/authors/52876
@@ -285,21 +283,33 @@ classdef RoI2 < handle
         
         %% ROI move callbacks
         function roiMove_bdcb(xyr,src,evt)
-        % Button down callback.
-            cpos = get(gca, 'currentPoint');
-            xyr.old_cpos = cpos(1,1:2)';
-            xyr.old_p = xyr.p;
+        % Right Button down callback.
+        
+            buttonType = get(gcbf, 'SelectionType');
+            if strcmpi(buttonType, 'alt') || strcmpi(buttonType, 'open')
+                cpos = get(gca, 'currentPoint');
+                cpos = cpos(1,1:2)';
+                
+                if all(prod([cpos cpos] - [xyr.xrng; xyr.yrng], 2) < 0) 
+                    set(gcf,'Pointer','fleur');
+                
+                    xyr.old_cpos = cpos;
+                    xyr.old_p = xyr.p;
             
-            % Update axes limits:
-            xyr.axlims = axis;
+                    % Update axes limits:
+                    xyr.axlims = axis;
             
-            % Set the mouse motion function:
-            set(xyr.hfig, 'windowButtonMotionFcn', @(src,evt) roiMove_bmcb(xyr,src,evt));
+                    % Set the mouse motion function:
+                    set(xyr.hfig, 'windowButtonMotionFcn', @(src,evt) roiMove_bmcb(xyr,src,evt), ...
+                                  'windowButtonUpFcn',   @(src,evt) roiMove_bucb(xyr,src,evt) );
+                end
+            end
         end
         
         function roiMove_bucb(xyr,src,evt)
         % Button up callback.
-            set(xyr.hfig, 'windowButtonMotionFcn', xyr.old_bmcb);
+            set(xyr.hfig, 'windowButtonMotionFcn', xyr.old_bmcb, ...
+                          'Pointer', 'arrow');
         end
         
         function roiMove_bmcb(xyr,src,evt)
@@ -327,7 +337,7 @@ classdef RoI2 < handle
         %% Keyboard events callbacks
         function fkpcb(xyr, src, evt)
         % Handler for the figure keypress event.
-            if strcmpi(evt.Modifier,'control')
+            if false % strcmpi(evt.Modifier,'control')
                 cpos = get(gca, 'currentPoint');
                 cpos = cpos(1,1:2)';
                 
@@ -345,17 +355,24 @@ classdef RoI2 < handle
                                   'windowButtonUpFcn',   @(src,evt) roiMove_bucb(xyr,src,evt) );
 
                 end
+            elseif strcmpi(evt.Key, 'escape')
+                % Clear window interactions:
+                set(xyr.hfig, 'windowButtonMotionFcn', '',...
+                              'windowButtonDownFcn', @(src,evt) roiMove_bdcb(xyr,src,evt),...  
+                              'windowButtonUpFcn', '');
             end
         end
 
-        function fkrcb(xyr,src,evt)
+        function fkrcb(xyr,~,evt)
         % Handler for the figure keyboard release event.
             set(gcf,'Pointer','arrow');
             
-            % Restore callbacks:
-            set(xyr.hfig, 'windowButtonMotionFcn', xyr.old_bmcb, ...
-                          'windowButtonUpFcn',     xyr.old_bucb, ...
-                          'windowButtonDownFcn',   xyr.old_bdcb);
+            if ~strcmpi(evt.Key, 'escape')
+                % Restore callbacks:
+                set(xyr.hfig, 'windowButtonMotionFcn', xyr.old_bmcb, ...
+                              'windowButtonUpFcn',     xyr.old_bucb, ...
+                              'windowButtonDownFcn',   xyr.old_bdcb);
+            end
         end
         
         %% Update ROI
@@ -435,20 +452,21 @@ classdef RoI2 < handle
                 % Find corresponding image indices:
                 if ishandle(xyr.himg)
                     v1 = ones(1, size(xyr.p,2));
-                    xyr.p_ix = round(xyr.p - xyr.p0*v1)./([xyr.dxx; xyr.dyy]*v1)+1;
-                    xyr.xrng_ix = round(xyr.xrng - xyr.p0(1)*v1)./[xyr.dxx xyr.dxx]+1;
-                    xyr.yrng_ix = round(xyr.yrng - xyr.p0(2)*v1)./[xyr.dyy xyr.dyy]+1;
+                    xyr.p_ix = round((xyr.p - xyr.p0*v1)./([xyr.dxx; xyr.dyy]*v1))+1;
+                    xyr.xrng_ix = round((xyr.xrng - xyr.p0(1)*v1)./[xyr.dxx xyr.dxx])+1;
+                    xyr.yrng_ix = round((xyr.yrng - xyr.p0(2)*v1)./[xyr.dyy xyr.dyy])+1;
                 end
 
                 % Restore figure settings:
                 set(xyr.hfig, 'windowButtonMotionFcn', xyr.old_bmcb );
                 set(xyr.hfig, 'windowButtonUpFcn',     xyr.old_bucb );
-                set(xyr.hfig, 'windowButtonDownFcn',   xyr.old_bdcb );
+%                 set(xyr.hfig, 'windowButtonDownFcn',   xyr.old_bdcb );
                 set(xyr.hfig, 'pointer', xyr.old_fpointer);
                 set(gca, 'NextPlot', xyr.old_NextPlot);
 
                 % Activate interaction:
                 set(xyr.hline, 'buttonDownFcn', @(src,evt) line_bdcb(xyr,src,evt));
+                set(xyr.hfig, 'windowButtonDownFcn', @(src,evt) roiMove_bdcb(xyr, src,evt));
             end                        
         end
         
