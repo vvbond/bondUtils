@@ -50,5 +50,10 @@ classdef CircBuffer < handle
             ix_wraped = mod(ix_linear-1, bfr.cols)+1;
             val = ix_wraped;
         end
+        
+        %% Wrappers
+        function write(bfr, A)
+            bfr.push(A);
+        end
     end
 end
