@@ -4,8 +4,8 @@ classdef ViewPort < handle
         bfr_data                    % data.
         nRows
         nCols
-        width
-        updateStep
+        width_s
+        updateStep_s
         updateStep_cols
         spacing_rows
         spacing_cols
@@ -20,33 +20,51 @@ classdef ViewPort < handle
        
         hfig
         himg
-        subview
-        subview_himg
+        hplot
+        roi
+        roi_himg
+        fp
+        playBtn
     end
     methods
         %% {Con,De}structor
-        function vp = ViewPort(width, updateStep, spacing_cols, spacing_rows)
+        function vp = ViewPort(width_s, updateStep_s, spacing_cols, spacing_rows)
             
             % Parse input:
-            vp.width = width;
-            vp.updateStep = updateStep;
-            vp.spacing_rows = spacing_rows;
+            vp.width_s = width_s;
+            vp.updateStep_s = updateStep_s;
             vp.spacing_cols = spacing_cols;
+            if nargin == 3
+                vp.spacing_rows = 1;
+            else
+                vp.spacing_rows = spacing_rows;
+            end
             
-            vp.nCols = floor(vp.width/vp.spacing_cols);
-            vp.updateStep_cols = floor(vp.updateStep/vp.spacing_cols);
-            
+            vp.init();
+        end
+        
+        function delete(vp)
+            delete(vp.bfr_data);
+            delete(vp.bfr_disp);
+            delete(vp.roi);
+            if ishandle(vp.hfig), delete(vp.hfig); end
         end
         
         %% Initialization
         function init(vp)
             
+            vp.nCols = floor(vp.width_s/vp.spacing_cols);
+            vp.updateStep_cols = floor(vp.updateStep_s/vp.spacing_cols);
+            
             % Decimation:
             scrSz = get(0,'ScreenSize');
             scrWidth = scrSz(3); scrHeight = scrSz(4);
             vp.decimateFactor_cols = max(1, floor(vp.nCols/scrWidth));
-            vp.decimateFactor_rows = max(1, floor(vp.nRows/scrHeight));
             nCols_decimated = ceil(vp.nCols/vp.decimateFactor_cols);
+            
+            if isempty(vp.nRows), return; end
+            
+            vp.decimateFactor_rows = max(1, floor(vp.nRows/scrHeight));
             nRows_decimated = ceil(vp.nRows/vp.decimateFactor_rows);
             
             % Create buffers:
@@ -55,12 +73,41 @@ classdef ViewPort < handle
             
             % Setup figure:
             vp.hfig(1) = figure(randi(1e6)); clf
-            vp.himg = imagesc( (0:nCols_decimated-1)*vp.spacing_cols*vp.decimateFactor_cols,... 
-                               (0:nRows_decimated-1)*vp.spacing_rows*vp.decimateFactor_rows,...
-                               vp.bfr_disp.data);
-            xlabel(sprintf('%s [%s]', vp.label_cols, vp.units_cols));
-            ylabel(sprintf('%s [%s]', vp.label_rows, vp.units_rows));
-            vp.subview = RoI2;
+            if vp.nRows == 1
+                vp.hplot = plot( (0:nCols_decimated-1)*vp.spacing_cols*vp.decimateFactor_cols, vp.bfr_disp.data);
+                xlabel(sprintf('%s [%s]', vp.label_cols, vp.units_cols));
+                if exist('RoI1', 'file'), vp.roi = RoI1; end
+            else
+                vp.himg = imagesc( (0:nCols_decimated-1)*vp.spacing_cols*vp.decimateFactor_cols,... 
+                                   (0:nRows_decimated-1)*vp.spacing_rows*vp.decimateFactor_rows,...
+                                   vp.bfr_disp.data);
+                xlabel(sprintf('%s [%s]', vp.label_cols, vp.units_cols));
+                ylabel(sprintf('%s [%s]', vp.label_rows, vp.units_rows));
+                if exist('RoI2', 'file'), vp.roi = RoI2; end
+            end
+            
+            % Create toggle buttons:
+            ht = findall(vp.hfig(1),'Type','uitoolbar'); % Find the toolbar.
+            
+            % ROI view button:
+            if isempty(findobj(ht, 'Tag', 'roiViewBtn')) && ~isempty(vp.roi)
+                roiViewIcon = load(fullfile(fileparts(mfilename('fullpath')),'/icons/roiViewIcon.mat'));
+                uitoggletool(ht(1), 'CData', roiViewIcon.cdata, ...
+                                    'OnCallback', @(src,evt) vp.roiView,...
+                                    'OffCallback', @(src,evt) vp.roiViewOff,...
+                                    'TooltipString', 'View ROI', ...
+                                    'Tag', 'roiViewBtn',... 
+                                    'Separator', 'off');
+            end
+            
+            % Play button:
+            if isempty(findobj(ht, 'Tag', 'playBtn'))
+                playIcon = load(fullfile(fileparts(mfilename('fullpath')),'/icons/playIcon.mat'));
+                vp.playBtn = uitoggletool(ht(1), 'CData', playIcon.cdata, ...
+                                                 'TooltipString', 'Play', ...
+                                                 'Tag', 'playBtn',... 
+                                                 'Separator', 'on');
+            end
         end
              
         %% Push
@@ -75,42 +122,75 @@ classdef ViewPort < handle
             
             vp.colCount = vp.colCount + size(D,2);
             if vp.colCount > vp.updateStep_cols
-                set(vp.himg, 'cdata', vp.bfr_disp.data);
-                caxis([-1 1]*3)
-                drawnow
-                
+                if vp.nRows == 1
+                    set(vp.hplot, 'ydata', vp.bfr_disp.data);
+                else
+                    set(vp.himg, 'cdata', vp.bfr_disp.data);
+                    caxis auto
+                    drawnow
+                end
                 vp.colCount = mod(vp.colCount, vp.updateStep_cols);
             end
         end
         
         %% Plot
-        function subview_update(vp, r)
+        function roiView_update(vp, r)
             
-            roiData_rows = inarange(1:vp.nRows, r.yrng_ix*vp.decimateFactor_rows);
-            roiData_cols = inarange(1:vp.nCols, r.xrng_ix*vp.decimateFactor_cols);
-            cols_wraped = vp.bfr_data.ix(roiData_cols);
+            if ~ishandle(vp.hfig(2)), return; end
+                
+            cols = 1:vp.nCols;
+            rows = 1:vp.nRows;
+            roi_rows = inarange(rows, r.yrng_ix*vp.decimateFactor_rows);
+            roi_cols = inarange(cols, r.xrng_ix*vp.decimateFactor_cols);
+            cols_wrapped = vp.bfr_data.ix(roi_cols);
             
-            SubD = vp.bfr_data.D(roiData_rows, cols_wraped);
-            set(vp.subview_himg, 'cdata', SubD,...
-                                 'xdata', vp.subview.xrng(1):vp.subview.xrng(2),...
-                                 'ydata', vp.subview.yrng(1):vp.subview.yrng(2));
+            SubD = vp.bfr_data.D(roi_rows, cols_wrapped);
+            xData = (cols(roi_cols)-1)*vp.spacing_cols;
+            yData = (rows(roi_rows)-1)*vp.spacing_rows;
+            set(vp.roi_himg, 'cdata', SubD,...
+                                 'xdata', xData,...
+                                 'ydata', yData);
         end
         
-        function subview_on(vp)
-                       
-            roiData_rows = inarange(1:vp.nRows, vp.subview.yrng_ix*vp.decimateFactor_rows);
-            roiData_cols = inarange(1:vp.nCols, vp.subview.xrng_ix*vp.decimateFactor_cols);
-            cols_wraped = vp.bfr_data.ix(roiData_cols);
+        function roiView(vp)
             
-            SubD = vp.bfr_data.D(roiData_rows, cols_wraped);
+            cols = 1:vp.nCols;
+            rows = 1:vp.nRows;
+            roi_rows = inarange(rows, vp.roi.yrng_ix*vp.decimateFactor_rows);
+            roi_cols = inarange(cols, vp.roi.xrng_ix*vp.decimateFactor_cols);
+            cols_wrapped = vp.bfr_data.ix(roi_cols);
+            
+            SubD = vp.bfr_data.D(roi_rows, cols_wrapped);
+            
+            xData = (cols(roi_cols)-1)*vp.spacing_cols;
+            yData = (rows(roi_rows)-1)*vp.spacing_rows;
+            
             vp.hfig(2) = figure(randi(1e6)); clf;
-            vp.subview_himg = imagesc(vp.subview.xrng(1):vp.subview.xrng(2), vp.subview.yrng(1):vp.subview.yrng(2), SubD);            
+            fpos = get(vp.hfig(1), 'Position');
+            S = diag([1 1 .75 .75]);
+            fpos = fpos*S;
+            set(vp.hfig(2), 'Position', fpos);
+            vp.roi_himg = imagesc(xData, yData, SubD);            
             axis tight
-            colormap gray
+            colormap parula
             iColorBar;
-            vp.subview.userFcn = @(r) vp.subview_update(r);
+            vp.roi.userFcn = @(r) vp.roiView_update(r);
             xlabel(sprintf('%s [%s]', vp.label_cols, vp.units_cols));
             ylabel(sprintf('%s [%s]', vp.label_rows, vp.units_rows));
+            
+            if exist('fPoker', 'file')==2
+                vp.fp = fPoker;
+                vp.fp.monitor('y');
+            end
+        end
+        
+        function roiViewOff(vp)
+            vp.roi.userFcn = [];
+        end
+        
+        %% Wrappers
+        function write(vp, A)
+            vp.push(A);
         end
     end
 end
