@@ -41,7 +41,7 @@ classdef fPoker < handle
         xMonitorRunning = 0;
         yMonitorRunning = 0;
     end
-    
+        
     % Auxiliary properties:
     properties(Hidden = true)
         hBtn        % handle to the switch button.
@@ -104,32 +104,35 @@ classdef fPoker < handle
            
            %  Get scaling info about the image:
            if ~isempty(fp.himg) && ishandle(fp.himg)
-               fp.p0 = [fp.himg.XData(1) fp.himg.YData(1)];
-               
-               [nRows, nCols] = size(fp.himg.CData);
-               if length(fp.himg.XData) == nCols
-                   fp.dx = diff(fp.himg.XData(1:2));
-               else
-                   warning('The length of the X-coordinate vector doesn''t match the number of columns in the image.');
-                   fp.dx = diff(fp.himg.XData([1,end]) )/( nCols - 1 );
-               end
-               
-               if length(fp.himg.YData) == nRows
-                   fp.dy = diff(fp.himg.YData(1:2));
-               else
-                   warning('The length of the Y-coordinate vector doesn''t match the number of rows in the image.');
-                   fp.dy = diff(fp.himg.XData([1,end]))/( nRows - 1 );
-               end
-
-               
+               fp.init();
+                               
                % Prepare handles for the X/Y line plots:
                fp.hXfig = randi(1e6);
                fp.hYfig = randi(1e6);
            else
                fp.color = 'k';
            end
-           
-           
+        end
+        
+        function init(fp)
+        % Initialize scaling coefficients.
+        
+           fp.p0 = [fp.himg.XData(1) fp.himg.YData(1)];
+
+           [nRows, nCols] = size(fp.himg.CData);
+           if length(fp.himg.XData) == nCols
+               fp.dx = diff(fp.himg.XData(1:2));
+           else
+               warning('The length of the X-coordinate vector doesn''t match the number of columns in the image.');
+               fp.dx = diff(fp.himg.XData([1,end]) )/( nCols - 1 );
+           end
+
+           if length(fp.himg.YData) == nRows
+               fp.dy = diff(fp.himg.YData(1:2));
+           else
+               warning('The length of the Y-coordinate vector doesn''t match the number of rows in the image.');
+               fp.dy = diff(fp.himg.XData([1,end]))/( nRows - 1 );
+           end
         end
         
         %% Destructor
@@ -210,10 +213,6 @@ classdef fPoker < handle
             switch dim
                 case 'x'
                     fp.xMonitorOnOff = mod(fp.xMonitorOnOff + 1, 2); % flip the switch.
-                    if fp.OnOff && fp.xMonitorOnOff && ~ishandle(fp.hXfig) 
-                        figure(fp.hXfig);
-                        set(fp.hXfig, 'NumberTitle', 'off', 'Name', 'X-Monitor');
-                    end
                     
                     % Report the status:
                     if fp.xMonitorOnOff
@@ -224,10 +223,6 @@ classdef fPoker < handle
                     
                 case 'y'
                     fp.yMonitorOnOff = mod(fp.yMonitorOnOff + 1, 2); % flip the switch.
-                    if fp.OnOff && fp.yMonitorOnOff && ~ishandle(fp.hYfig)
-                        figure(fp.hYfig);
-                        set(fp.hXfig, 'NumberTitle', 'off', 'Name', 'Y-Monitor');
-                    end
                     
                     % Report the status:
                     if fp.yMonitorOnOff
@@ -257,11 +252,16 @@ classdef fPoker < handle
                 box on; grid on;
                 pan xon; zoom xon
                 
+                if exist('Rulerz', 'file') == 2
+                    Rulerz('x');
+                end
+
+                
                 % Return focus to the main figure:
                 figure(fp.hfig);
             else
-                fp.xplot(:,2) = fp.himg.CData(:, fp.pix(1));
-                set(fp.hXplot, 'ydata', fp.xplot(:,2) );
+                fp.xplot = [fp.himg.YData(:), fp.himg.CData(:,fp.pix(1))];
+                set(fp.hXplot, 'xdata', fp.xplot(:,1), 'ydata', fp.xplot(:,2) );
 %                 set(fp.hXplot_Y, 'xdata', [1 1]*fp.p(2), 'ydata', arange(fp.himg.CData(:,fp.pix(1))));
                 set(fp.hXMonitorTitle, 'String', sprintf('x = %1.2f;  ix = %1d', fp.p(1), fp.pix(1)));
             end
@@ -273,7 +273,13 @@ classdef fPoker < handle
                 yLabel = get(fp.hax, 'XLabel');
                 
                 figure(fp.hYfig); clf;
-                set(fp.hYfig, 'NumberTitle', 'off', 'Name', 'Y-Monitor');
+                T = [ 1 0 0 0
+                      0 1 0 0
+                      0 0 1 0
+                      0 1 0 1 ];
+                fpos = fp.hfig.Position*T; % shift (translate).
+                
+                set(fp.hYfig, 'NumberTitle', 'off', 'Name', 'Y-Monitor', 'Position', fpos);
                 fp.hYplot = plot(fp.yplot(:,1), fp.yplot(:,2)); 
 %                 hold on;
 %                 fp.hYplot_X = plot([1 1]*fp.p(2), ylim, '--');
@@ -282,10 +288,15 @@ classdef fPoker < handle
                 xlabel(yLabel.String);
                 box on; grid on;
                 
+                if exist('Rulerz', 'file') == 2
+                    Rulerz('x');
+                end
+                
                 % Return focus to the main figure:
                 figure(fp.hfig);
             else
-                set(fp.hYplot, 'ydata', fp.himg.CData(fp.pix(2), :));
+                fp.yplot = [fp.himg.XData(:), fp.himg.CData(fp.pix(2), :)'];
+                set(fp.hYplot, 'xdata', fp.yplot(:,1), 'ydata', fp.yplot(:,2));
 %                 set(fp.hYplot_X, 'xdata', [1 1]*fp.p(2), 'ydata', arange(fp.himg.CData(:,fp.pix(1))));
                 set(fp.hYMonitorTitle, 'String', sprintf('y = %1.2f;  ix = %1d', fp.p(2), fp.pix(2)));
             end
@@ -295,13 +306,14 @@ classdef fPoker < handle
         %% Window button motion callback
         function wbmcb(fp,src,evt)
             % Get the cursor position:
-            pos = get(gca,'CurrentPoint');
+            pos = get(fp.hax,'CurrentPoint');
             fp.p = pos(1,[1 2]); % cursor position.
             
             cursorString = { num2str(fp.p(1), fp.format{1}), num2str(fp.p(2), fp.format{end}) };
             
             % Find corresponding indices into the image matrix:
             if ishandle(fp.himg)
+                fp.init();
                 fp.pix = round((fp.p-fp.p0)./[fp.dx, fp.dy])+1;
                 % Clip to the image range:
                 fp.pix(fp.pix <= 0) = 1;
@@ -381,6 +393,7 @@ classdef fPoker < handle
                 
             
         end
+        
         %% Window button down callback
         function wbdcb(fp,src,evt)
             
