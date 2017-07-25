@@ -78,7 +78,7 @@ classdef RoI2 < handle
             
             % Create toggle button:
             xyr.htbar = findall(gcf,'Type','uitoolbar');
-            xyroiIcon = load('roi2Icon.mat');
+            xyroiIcon = load(fullfile(fileparts(mfilename('fullpath')),'/icons/roi2Icon.mat'));
             xyr.hbtn =  uitoggletool(xyr.htbar(1), 'CData', xyroiIcon.cdata, ...
                                                 'onCallback',  @(src,evt) roiOn(xyr,src,evt),...
                                                 'offCallback', @(src,evt) roiOff(xyr,src,evt),...
@@ -126,7 +126,9 @@ classdef RoI2 < handle
             % Delete the ROI.
             if ishandle(xyr.hline), delete(xyr.hline); end
             % Restore figure keyboard events:
-            set(xyr.hfig, 'KeyPressFcn', xyr.old_keyPressCb, 'KeyReleaseFcn', xyr.old_keyReleaseCb);
+            if ishandle(xyr.hfig)
+                set(xyr.hfig, 'KeyPressFcn', xyr.old_keyPressCb, 'KeyReleaseFcn', xyr.old_keyReleaseCb);
+            end
         end
         
         %% ROI On/Off callbacks
