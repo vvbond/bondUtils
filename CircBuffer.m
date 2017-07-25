@@ -3,6 +3,7 @@ classdef CircBuffer < handle
     properties
         D
         cursor = 0
+        count = 0
         rows
         cols
     end
@@ -10,22 +11,24 @@ classdef CircBuffer < handle
     properties(Dependent)
         ix
     end
-    
+        
     methods
-        function bfr = CircBuffer(m,n)
+        function bfr = CircBuffer(m, n)
             narginchk(1,2);
             if nargin == 1
                 bfr.rows = [];
-                bfr.cols = m;
+                bfr.cols = floor(m);
             else
-                bfr.rows = m;
-                bfr.cols = n;
+                bfr.rows = floor(m);
+                bfr.cols = floor(n);
                 bfr.init();
-            end
+            end            
         end
         
         function init(bfr)
             bfr.D = zeros(bfr.rows, bfr.cols);
+            bfr.cursor = 0;
+            bfr.count = 0;
         end
         
         function push(bfr, A)
@@ -36,19 +39,21 @@ classdef CircBuffer < handle
             n = size(A,2);
             if n > bfr.cols, error('Too many columns.'); end
             ix_linear = bfr.cursor+(1:n);
-            ix_wraped = mod(ix_linear-1, bfr.cols)+1;
-            bfr.D(:, ix_wraped) = A;
-            bfr.cursor = ix_wraped(end);
+            ix_wrap = mod(ix_linear-1, bfr.cols)+1;
+            bfr.D(:, ix_wrap) = A;
+            bfr.cursor = ix_wrap(end);
+            bfr.count = bfr.count + n;
         end
         
         function D = data(bfr)
             D = bfr.D(:,bfr.ix);
         end
         
+        %% Setters/Getters
         function val = get.ix(bfr)
             ix_linear = bfr.cursor+(1:bfr.cols);
-            ix_wraped = mod(ix_linear-1, bfr.cols)+1;
-            val = ix_wraped;
+            ix_wrap = mod(ix_linear-1, bfr.cols)+1;
+            val = ix_wrap;
         end
         
         %% Wrappers
