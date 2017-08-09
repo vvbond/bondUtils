@@ -13,17 +13,20 @@ classdef FunPrint < handle
         backspace;
     end
     
+    %% {Con,De}structor
     methods
         function fpr = FunPrint()
             fpr.backspace = '';
         end
-        
+    end
+    
+    %% Some fun
+    methods
         function over(fpr, msg, varargin)
             msgStr = FunPrint.sprintf_cell(msg, varargin);
             fprintf([fpr.backspace, msgStr]);
             fpr.backspace = fpr.bspStr(ones(1, length(msgStr)));
-        end
-        
+        end        
     end
     
     %% Static methods

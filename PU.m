@@ -58,7 +58,7 @@ classdef PU < handle
 %             if any(strcmpi(methods(pu.sink), 'init'))
 %                 pu.sink.init;
 %             end
-            if isa(pu.sink, 'ViewPort') || isa(pu.sink, 'ViewPort1')
+            if isa(pu.sink, 'ViewPort')
                 if ishandle(pu.sink.playBtn)
                     set(pu.sink.playBtn, 'OnCallback',  @(src,evt) pu.start,...
                                          'OffCallback', @(src,evt) pu.stop);

@@ -1,4 +1,4 @@
-classdef CircBuffer < handle
+classdef CircBufferT < handle
 % Class implementing a circular buffer for arrays.
 %
 % Usage: 
@@ -24,7 +24,7 @@ classdef CircBuffer < handle
     
     methods
         %% {Con,De}structor
-        function bfr = CircBuffer(elsz, numels)
+        function bfr = CircBufferT(elsz, numels)
             bfr.numels = numels;
             bfr.elsz = elsz;
             % Init:

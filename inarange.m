@@ -7,7 +7,11 @@ function yn = inarange(x, rng, rngType)
 %  x - scalar or vector.
 %  rng - 2-vector, [from to] or [to from].
 % Optional:
-%  rngType - 1 character string: '(' or '[' - exclusive (default) or inclusive range.
+%  rngType - character string specifying range type, default '[':
+%            '('    - exclusive on both sides, 
+%            '['    - inclusive on both sides,
+%            '[)'   - inclusive on the left, exclusive on the right,
+%            '(]'   - exclusive on the right, inclusive on the left.
 %
 % OUTPUT:
 %  yn - boolean, size of x.
@@ -30,9 +34,13 @@ end
 rng = sort(rng);
 switch rngType
     case '('
-        yn = ( x>rng(1) ) & ( x<rng(2) ); 
+        yn = x >  rng(1) & x <  rng(2); 
     case '['
-        yn = ( x>=rng(1) ) & ( x<=rng(2) ); 
+        yn = x >= rng(1) & x <= rng(2); 
+    case '[)'
+        yn = x >= rng(1) & x < rng(2);
+    case '(]'
+        yn = x >  rng(1) & x <=rng(2); 
     otherwise
         error('Wrong range type.');
 end
