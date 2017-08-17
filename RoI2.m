@@ -140,6 +140,11 @@ classdef RoI2 < handle
             
             % If a figure has an image, grab its handle:
             xyr.himg = findobj(xyr.hfig, 'type', 'image');
+            if length(xyr.himg) > 1
+                warning('RoI2: can''t handle multiple images in figure.');
+                xyr.hbtn.Enable = 'off';
+                return;
+            end
            
             % Get scaling info about the image:
             if ishandle(xyr.himg)
