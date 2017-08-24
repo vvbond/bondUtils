@@ -37,7 +37,7 @@ classdef CircBuffer < handle
                 error('Number of rows is inconsistent with the buffer definition.');
             end
             n = size(A,2);
-            if n > bfr.cols, error('Too many columns.'); end
+            if n > bfr.cols, error('CircBuffer: too many columns.'); end
             ix_linear = bfr.cursor+(1:n);
             ix_wrap = mod(ix_linear-1, bfr.cols)+1;
             bfr.D(:, ix_wrap) = A;

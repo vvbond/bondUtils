@@ -3,8 +3,10 @@ classdef PU < handle
     properties
         src
         sink
+        init_fcn
         process_fcn
-        hl
+        hl_eos
+        hl_ready
         tmr
     end
     
@@ -35,10 +37,15 @@ classdef PU < handle
             pu.tmr.ExecutionMode = 'fixedSpacing';
             
             pu.init;
+            
+            if any(strcmpi(events(pu.src), 'EndOfStream'))
+                pu.hl_eos = event.listener(pu.src, 'EndOfStream', @(src,evt) pu.finish);
+            end
         end
         
         function delete(pu)
-            delete(pu.hl);
+            delete(pu.hl_ready);
+            delete(pu.hl_eos);
             delete(pu.tmr);
         end
         
@@ -55,20 +62,25 @@ classdef PU < handle
             end
 
             % Initialise sink:
-%             if any(strcmpi(methods(pu.sink), 'init'))
-%                 pu.sink.init;
-%             end
-            if isa(pu.sink, 'ViewPort')
-                if ishandle(pu.sink.playBtn)
-                    set(pu.sink.playBtn, 'OnCallback',  @(src,evt) pu.start,...
-                                         'OffCallback', @(src,evt) pu.stop);
-                end
+            if any(strcmpi(methods(pu.sink), 'init'))
+                pu.sink.init;
+            end
+            if any(strcmpi(methods(pu.sink), 'open'))
+                pu.sink.open;
+            end
+
+            
+            % Type-specific sink handling:
+            if isa(pu.sink, 'ViewPort') && ishandle(pu.sink.playBtn)
+                set(pu.sink.playBtn, 'OnCallback',  @(src,evt) pu.start,...
+                                     'OffCallback', @(src,evt) pu.stop,...
+                                     'Enable', 'on');
             end
         end
         
         %% Connect to another unit
         function connect(pu, eventSource)
-            pu.hl = addlistener(eventSource, 'Ready', @(src,evt) pu.process);
+            pu.hl_ready = event.listener(eventSource, 'Ready', @(src,evt) pu.process);
         end
         
         %% Process
@@ -80,18 +92,35 @@ classdef PU < handle
                 else
                     Dout = Din;
                 end
-                pu.sink.push(Dout);
+                pu.sink.write(Dout);
             end
             notify(pu, 'Ready');
         end
         
+        function finish(pu)
+            pu.stop;
+            fprintf('[%s] End of stream.\n', datestr(now));
+            if isa(pu.sink, 'ViewPort') && ishandle(pu.sink.playBtn)
+                pu.sink.playBtn.Enable = 'off';
+            end            
+        end
+        
         %% Timer
         function start(pu)
+        % Start timer.
+            if strcmpi(pu.tmr.Running, 'on'), return; end
             start(pu.tmr);
+            if isa(pu.sink, 'ViewPort') && ishandle(pu.sink.playBtn)
+                pu.sink.playBtn.State = 'on';
+            end
         end
         
         function stop(pu)
+        % Stop timer.
             stop(pu.tmr);
+            if isa(pu.sink, 'ViewPort') && ishandle(pu.sink.playBtn)
+                pu.sink.playBtn.State = 'off';
+            end
         end
         
     end
