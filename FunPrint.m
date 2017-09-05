@@ -73,41 +73,8 @@ classdef FunPrint < handle
             msg_ = [msg_ msg_split{end}];
             
             % Print!
-            msgStr = FunPrint.sprintf_cell(msg_, varargin);
+            msgStr = sprintf(msg_, varargin{:});
             fprintf(msgStr); 
-        end
-
-        function msgStr = sprintf_cell(msg, vars)
-        % sprintf with variable number of input arguments.
-            
-            % Sanity check:
-            narginchk(1, 2);
-            if nargin == 1, vars = []; end
-            
-            switch length(vars)
-                case 0
-                    msgStr = sprintf(msg);
-                case 1
-                    msgStr = sprintf(msg, vars{1});
-                case 2
-                    msgStr = sprintf(msg, vars{1}, vars{2});
-                case 3
-                    msgStr = sprintf(msg, vars{1}, vars{2}, vars{3});
-                case 4
-                    msgStr = sprintf(msg, vars{1}, vars{2}, vars{3}, vars{4});
-                case 5
-                    msgStr = sprintf(msg, vars{1}, vars{2}, vars{3}, vars{4}, vars{5});
-                case 6
-                    msgStr = sprintf(msg, vars{1}, vars{2}, vars{3}, vars{4}, vars{5}, vars{6});
-                case 7
-                    msgStr = sprintf(msg, vars{1}, vars{2}, vars{3}, vars{4}, vars{5}, vars{6}, vars{7});
-                case 8
-                    msgStr = sprintf(msg, vars{1}, vars{2}, vars{3}, vars{4}, vars{5}, vars{6}, vars{7}, vars{8});
-                case 9
-                    msgStr = sprintf(msg, vars{1}, vars{2}, vars{3}, vars{4}, vars{5}, vars{6}, vars{7}, vars{8}, vars{9});
-                case 10
-                    msgStr = sprintf(msg, vars{1}, vars{2}, vars{3}, vars{4}, vars{5}, vars{6}, vars{7}, vars{8}, vars{9}, vars{10});
-            end
         end
     end
 end
