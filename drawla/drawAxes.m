@@ -21,7 +21,7 @@ function drawAxes(d, colr, labels)
 % Copyright (c) 2009, Dr. Vladimir Bondarenko <http://sites.google.com/site/bondsite>
 
 % Check input:
-error(nargchk(2,3,nargin));
+narginchk(2,3);
 % Parse: input
 if nargin < 3, labels = {'x', 'y', 'z'}; end
 

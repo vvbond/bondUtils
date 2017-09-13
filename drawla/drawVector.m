@@ -38,7 +38,7 @@ function hV = drawVector(V, varargin)
 
 % Copyright (c) 2009, Dr. Vladimir Bondarenko <http://sites.google.com/site/bondsite>
 
-error(nargchk(1,5,nargin));
+narginchk(1,5);
 % Defaults
 mType = 'bo-';
 labels = [];
