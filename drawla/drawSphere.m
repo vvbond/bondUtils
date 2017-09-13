@@ -42,8 +42,8 @@ function varargout = drawSphere(varargin)
 % Copyright (c) 2009, Dr. Vladimir Bondarenko <http://sites.google.com/site/bondsite>
 
 % Input check:
-error(nargchk(0,5,nargin));
-error(nargoutchk(0,1,nargout));
+narginchk(0,5);
+nargoutchk(0,1);
 % Defaults:
 colr = 'b'; alfa = .5; A = []; xc = []; N = [];
 % Parse Input:
