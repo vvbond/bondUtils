@@ -41,7 +41,7 @@ classdef iColorBar < handle
             icolorbarIcon = load(fullfile(fileparts(mfilename('fullpath')),'icons', icon_fname));
             
             % Look if the button is already there:
-            icb.htbar = findall(icb.hfig, 'Type', 'uitoolbar');
+            icb.htbar = findall(icb.hfig, 'Tag', 'FigureToolBar');
             icbBtn = findall(icb.htbar, 'Tag', 'icolorbar_btn');
             if ~isempty(icbBtn)
                 icb.hbtn = icbBtn;

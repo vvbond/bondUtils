@@ -109,7 +109,7 @@ classdef RoI2 < handle
             xyroiIcon = load(fullfile(fileparts(mfilename('fullpath')),'icons', icon_fname));
             
             % Look if the button is already there:
-            xyr.htbar = findall(xyr.hfig, 'Type', 'uitoolbar');
+            xyr.htbar = findall(xyr.hfig, 'Tag', 'FigureToolBar');
             roiBtn = findall(xyr.htbar, 'Tag', 'roi2_btn');
             if ~isempty(roiBtn)
                 % Remove previous roi lines if any:
