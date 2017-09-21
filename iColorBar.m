@@ -11,6 +11,8 @@ classdef iColorBar < handle
 %  figure, imagesc(peaks(100)); iColorBar
 
     properties(Hidden)
+        hbtn
+        htbar
         hcb
         hax
         hfig
@@ -33,17 +35,72 @@ classdef iColorBar < handle
         function icb = iColorBar()
             icb.hfig = gcf;
             icb.hax = gca;
-            icb.hcb = colorbar;
-                       
-            % Setup interactions:
-            set(icb.hcb,  'ButtonDownFcn', @(src,evt) bdcb(icb,src,evt));
-            set(icb.hfig, 'KeyPressFcn',   @(src,evt) fkpcb(icb,src,evt), ...
-                          'KeyReleaseFcn', @(src,evt) fkrcb(icb,src,evt) );
+            
+            % Add toggle button:          
+            icon_fname = 'icolorbarIcon.mat';
+            icolorbarIcon = load(fullfile(fileparts(mfilename('fullpath')),'icons', icon_fname));
+            
+            % Look if the button is already there:
+            icb.htbar = findall(icb.hfig, 'Type', 'uitoolbar');
+            icbBtn = findall(icb.htbar, 'Tag', 'icolorbar_btn');
+            if ~isempty(icbBtn)
+                icb.hbtn = icbBtn;
+                set(icb.hbtn, 'onCallback',  @(src, evt) icb.icbON(src, evt),...
+                              'offCallback', @(src, evt) icb.icbOFF(src,evt),...
+                              'CData', icolorbarIcon.cdata,...
+                              'State', 'off',...
+                              'UserData', []);
+            else
+                icb.hbtn =  uitoggletool(icb.htbar(1),  'CData', icolorbarIcon.cdata, ...
+                                                        'onCallback',  @(src,evt) icb.icbON(src,evt),...
+                                                        'offCallback', @(src,evt) icb.icbOFF(src,evt),...
+                                                        'Separator', 'off',...
+                                                        'tooltipString', 'Insert interactive colorbar',...
+                                                        'Tag', 'icolorbar_btn');
+                % Re-order buttons:
+                hBtns = findall(icb.htbar(1));
+                dumIx = zeros(length(hBtns), 1);
+                for ii=1:length(hBtns), dumIx(ii) = strcmpi(hBtns(ii).Tag, 'Annotation.InsertColorBar'); end
+                cbarIx = find(dumIx);
+                set(icb.htbar, 'children', [hBtns(3:cbarIx-1); hBtns(2); hBtns(cbarIx:end)]);
+            end            
         end
         
         function delete(icb)
         % Destructor.
         
+            % Remove button:
+            if ishandle(icb.hbtn), delete(icb.hbtn); end
+                
+            % Restore figure callbacks:
+            if ishandle(icb.hfig)                
+                set(icb.hfig, 'WindowButtonMotionFcn', icb.old_wbmcb, ...
+                              'WindowButtonUpFcn',     icb.old_wbucb, ... 
+                              'KeyPressFcn',           icb.old_fkpcb, ...
+                              'KeyReleaseFcn',         icb.old_fkrcb );
+            end
+        end
+    end
+    
+    %% ON/OFF
+    methods
+        function icbON(icb, ~, ~)
+            
+            % Creat colorbar:
+            icb.hcb = colorbar;
+            
+            % Switch off interactive modes:
+            icb.interactivesOff;
+            
+            % Setup interactions:
+            set(icb.hcb,  'ButtonDownFcn', @(src,evt) bdcb(icb,src,evt));
+        end
+        
+        function icbOFF(icb, ~, ~)
+            
+            % Remove colorbar:
+            delete(icb.hcb);
+            
             % Restore figure callbacks:
             if ishandle(icb.hfig)                
                 set(icb.hfig, 'WindowButtonMotionFcn', icb.old_wbmcb, ...
@@ -68,9 +125,12 @@ classdef iColorBar < handle
             icb.old_wbucb  = get(gcf, 'WindowButtonUpFcn');
             icb.old_fkpcb  = get(gcf, 'KeyPressFcn');
             icb.old_fkrcb  = get(gcf, 'KeyReleaseFcn');
-
+            
+            % Set new interactions:
             set(icb.hfig, 'WindowButtonMotionFcn', @(src,evt) wbmcb(icb, src, evt),...
                           'WindowButtonUpFcn',     @(src,evt) wbucb(icb, src, evt));
+            set(icb.hfig, 'KeyPressFcn',   @(src,evt) fkpcb(icb,src,evt), ...
+                          'KeyReleaseFcn', @(src,evt) fkrcb(icb,src,evt) );                                  
         end
         
         function wbmcb(icb, ~, ~)
@@ -86,7 +146,13 @@ classdef iColorBar < handle
                     caxNewMax =  icb.caxLims(1) + icb.fpos/fpos2*diff(icb.caxLims);
                     caxLims1  = [icb.caxLims(1) caxNewMax]; % update color axis upper limit. 
             end
-            caxis(icb.hax, caxLims1);
+            if caxLims1(2) > caxLims1(1)
+                try
+                    caxis(icb.hax, caxLims1);
+                catch ME
+                    warning('iColorBar: couln''t set color axis for the limits: [%5.2f %5.2f]\n %s', caxLims1, ME.message);
+                end             
+            end
         end
         
         function wbucb(icb, ~, ~)
@@ -105,6 +171,13 @@ classdef iColorBar < handle
         
         function fkrcb(icb, ~, ~)
             icb.mode = 0;
+        end
+    end
+    
+    %% Misc
+    methods
+        function interactivesOff(icb)
+            plotedit off, zoom off, pan off, rotate3d off, datacursormode off, brush off
         end
     end
 end
