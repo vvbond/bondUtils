@@ -86,20 +86,25 @@ classdef iColorBar < handle
     methods
         function icbON(icb, ~, ~)
             
-            % Creat colorbar:
-            icb.hcb = colorbar;
+            % Find or create a colorbar:
+            cbar = findobj(icb.hfig, 'type', 'colorbar');
+            if isempty(cbar)
+                icb.hcb = colorbar;
+            else
+                icb.hcb = cbar;
+            end
             
             % Switch off interactive modes:
             icb.interactivesOff;
             
-            % Setup interactions:
+            % Turn on interaction:
             set(icb.hcb,  'ButtonDownFcn', @(src,evt) bdcb(icb,src,evt));
         end
         
         function icbOFF(icb, ~, ~)
             
-            % Remove colorbar:
-            delete(icb.hcb);
+            % Turn off interaction:
+            if ishandle(icb.hcb), set(icb.hcb,  'ButtonDownFcn', []); end
             
             % Restore figure callbacks:
             if ishandle(icb.hfig)                
