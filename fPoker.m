@@ -144,7 +144,7 @@ classdef fPoker < handle
         end
         
         %% ON switch
-        function PokerON(fp, src, evt)
+        function PokerON(fp, ~, ~)
         % Enable the Poker tool.
         
             % Turn off other interactive tools:
@@ -186,7 +186,7 @@ classdef fPoker < handle
         end
         
         %% OFF switch
-        function PokerOFF(fp, src, evt)
+        function PokerOFF(fp, ~, ~)
         % Disable the Poker tool.
             
             % Restore existing interaction callbacks:
@@ -276,7 +276,7 @@ classdef fPoker < handle
                 T = [ 1 0 0 0
                       0 1 0 0
                       0 0 1 0
-                      0 1 0 1 ];
+                      0 1 0 .5 ];
                 fpos = fp.hfig.Position*T; % shift (translate).
                 
                 set(fp.hYfig, 'NumberTitle', 'off', 'Name', 'Y-Monitor', 'Position', fpos);
@@ -288,7 +288,7 @@ classdef fPoker < handle
                 xlabel(yLabel.String);
                 box on; grid on;
                 
-                if exist('Rulerz', 'file') == 2
+                if exist('Rulerz', 'file')
                     Rulerz('x');
                 end
                 
@@ -304,7 +304,7 @@ classdef fPoker < handle
     end
     methods(Hidden = true, Access = private)
         %% Window button motion callback
-        function wbmcb(fp,src,evt)
+        function wbmcb(fp, ~, ~)
             % Get the cursor position:
             pos = get(fp.hax,'CurrentPoint');
             fp.p = pos(1,[1 2]); % cursor position.
@@ -317,9 +317,9 @@ classdef fPoker < handle
                 fp.pix = round((fp.p-fp.p0)./[fp.dx, fp.dy])+1;
                 % Clip to the image range:
                 fp.pix(fp.pix <= 0) = 1;
-                [m n] = size(fp.himg.CData);
+                [m, n] = size(fp.himg.CData);
                 if fp.pix(1) > n, fp.pix(1) = n; end
-                if fp.pix(2) > m, fp.pix(1) = m; end
+                if fp.pix(2) > m, fp.pix(2) = m; end
                 
                 cursorString = { sprintf([fp.format{1} ' (%3d)'], fp.p(1), fp.pix(1))
                                  sprintf([fp.format{end} ' (%3d)'], fp.p(2), fp.pix(2)) };
@@ -368,7 +368,7 @@ classdef fPoker < handle
         end
         
         %% Window button up callback
-        function wbucb(fp,src,evt)
+        function wbucb(fp, src, ~)
 
             switch src.SelectionType
                 case 'normal'     % single click.
@@ -395,12 +395,12 @@ classdef fPoker < handle
         end
         
         %% Window button down callback
-        function wbdcb(fp,src,evt)
-            
-        end
+%         function wbdcb(fp,src,evt)
+%             
+%         end
 
         %% Window Mouse scroll wheel callback
-        function wswcb(fp,src,evt)
+        function wswcb(fp, ~, evt)
         % Zoom by scroll wheel.
         
             % Store current cursor position:
@@ -417,7 +417,7 @@ classdef fPoker < handle
         end
         
         %% Axis button down (click) callback
-        function axbdcb(fp,src,evt)
+        function axbdcb(fp, ~, ~)
             
             fp.panOn  = 1;
             oldFigUnits = get(gcf, 'Units');
@@ -427,10 +427,10 @@ classdef fPoker < handle
             fp.panOldAxis  = axis;  % Store the initial axis info.
             
             % Find axes dimensions in pixels:
-            hax = gca;
-            set(hax, 'units', 'pixels');
-            axpos = get(hax, 'position');
-            set(hax, 'units', 'normalized');
+            haxes = gca;
+            set(haxes, 'units', 'pixels');
+            axpos = get(haxes, 'position');
+            set(haxes, 'units', 'normalized');
             fp.panScaling = [ diff(xlim)/axpos(3) diff(ylim)/axpos(4) ];     
         end
         
