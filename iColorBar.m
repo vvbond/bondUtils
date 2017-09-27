@@ -95,13 +95,15 @@ classdef iColorBar < handle
             end
             
             % Switch off interactive modes:
-            icb.interactivesOff;
+            icb.interactivesOff(icb.hfig);
             
             % Turn on interaction:
             set(icb.hcb,  'ButtonDownFcn', @(src,evt) bdcb(icb,src,evt));
         end
         
         function icbOFF(icb, ~, ~)
+            
+            icb.mode = 0;
             
             % Turn off interaction:
             if ishandle(icb.hcb), set(icb.hcb,  'ButtonDownFcn', []); end
@@ -171,6 +173,9 @@ classdef iColorBar < handle
                 icb.mode = 1;
             elseif strcmpi(evt.Modifier, 'shift')
                 icb.mode = 2;
+            elseif strcmpi(evt.Modifier, 'escape')
+                icb.icbOFF;
+                icb.escape;
             end
         end
         
@@ -179,10 +184,25 @@ classdef iColorBar < handle
         end
     end
     
-    %% Misc
-    methods
-        function interactivesOff(icb)
+    %% Static
+    methods(Static)
+        function interactivesOff(hfig)
+        % Switch off interactive tools.
+            curfig = gcf;
+            figure(hfig)
             plotedit off, zoom off, pan off, rotate3d off, datacursormode off, brush off
+            figure(curfig)
+        end
+        
+        function escape(hfig)
+        % Emergency: clear all interaction callbacks.
+            if ishandle(hfig)                
+                set(hfig, 'WindowButtonMotionFcn', [], ...
+                          'WindowButtonUpFcn',     [], ... 
+                          'WindowButtonDownFcn',   [], ...
+                          'KeyPressFcn',           [], ...
+                          'KeyReleaseFcn',         [] );
+            end            
         end
     end
 end

@@ -23,7 +23,7 @@ classdef FunPrint < handle
     %% Some fun
     methods
         function over(fpr, msg, varargin)
-            msgStr = FunPrint.sprintf_cell(msg, varargin);
+            msgStr = sprintf(msg, varargin{:});
             fprintf([fpr.backspace, msgStr]);
             fpr.backspace = fpr.bspStr(ones(1, length(msgStr)));
         end        
