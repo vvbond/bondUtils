@@ -28,10 +28,11 @@ classdef RoI2 < handle
 %
 % Methods
 % =======
-%  [X, Y] = roi.samplegrid(dx, dy)  - Generate a 2D grid sampling the ROI with given dx, dy (for now, supported by parallelogram ROIs only).
-%  [X, Y] = roi.samplegrid()        - Generate a 2D sampling grid at image resolution.
-%  D = roi.resample(dx, dy)         - Resample the ROI at the sampling grid of dx, dy.
-%  D = roi.resample()               - Resample the ROI at the resolution of the underlying image.
+%  [X, Y] = roi.samplegrid(dx, dy)      - Generate a 2D grid sampling the ROI with given dx, dy (for now, supported by parallelogram ROIs only).
+%  [X, Y] = roi.samplegrid()            - Generate a 2D sampling grid at image resolution.
+%  D = roi.resample(dx, dy)             - Resample the ROI on the sampling grid defined by dx and dy by means of nearest neighbour interpolation.
+%  D = roi.resample()                   - Resample the ROI at the resolution of the underlying image.
+%  [D, xdata, ydata] = roi.resample()   - Extract ROI values and corresponding coordinates.
 %
 % User function
 % =============
@@ -79,7 +80,6 @@ classdef RoI2 < handle
         height
         width
     end
-    
     properties(Hidden = true)
         % Various handles:
         hfig    % figure handle.
@@ -100,12 +100,11 @@ classdef RoI2 < handle
         
         % Interactions:
         clicks      % clicks counter.
-        type       % type of the parallelogram (shape = 1): 1 -  horizontaly, 2 - verticaly extruded.
+        type        % type of the parallelogram (shape = 1): 1 -  horizontaly, 2 - verticaly extruded.
         lineIx      % index of the selected line in the hline array.
         old_cpos    % store cursor position for line movement.
         old_p       % store the ROI points matrix, p.
     end
-    
     % Image related properties:
     properties(Hidden = true)
         himg        % handle of an image if it exist in the figure.
@@ -114,7 +113,6 @@ classdef RoI2 < handle
         dyy         % increment on the y-axis.
         
     end
-    
     properties
         p_ix        % matrix of image indices corresponding to p.
         xrng_ix     % image indicies corresponding to xrng and
@@ -767,6 +765,16 @@ classdef RoI2 < handle
                     y_ix = floor( (Y(:) - xyr.p0(2))/xyr.dyy ) + 1;
                     D = xyr.himg.CData(sub2ind(size(xyr.himg.CData), y_ix, x_ix));
                     D = reshape(D, size(X));
+                    if nargout > 1
+                        switch xyr.type
+                            case 1
+                                xdata = 1:size(X,2);
+                                ydata = Y(:,1);
+                            case 2
+                                xdata = X(1,:);
+                                ydata = 1:size(Y,1);
+                        end                        
+                    end
             end
         end
         
