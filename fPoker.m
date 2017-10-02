@@ -122,6 +122,10 @@ classdef fPoker < handle
            [nRows, nCols] = size(fp.himg.CData);
            if length(fp.himg.XData) == nCols
                fp.dx = diff(fp.himg.XData(1:2));
+           elseif length(fp.himg.XData) == 2
+               % Create xdata vector:
+               fp.himg.XData = linspace(fp.himg.XData(1), fp.himg.XData(2), nCols);
+               fp.dx = diff(fp.himg.XData(1:2));
            else
                warning('The length of the X-coordinate vector doesn''t match the number of columns in the image.');
                fp.dx = diff(fp.himg.XData([1,end]) )/( nCols - 1 );
@@ -129,6 +133,10 @@ classdef fPoker < handle
 
            if length(fp.himg.YData) == nRows
                fp.dy = diff(fp.himg.YData(1:2));
+           elseif length(fp.himg.YData) == 2
+               % Create ydata vector:
+               fp.himg.YData = linspace(fp.himg.YData(1), fp.himg.YData(2), nRows);
+               fp.dy = diff(fp.himg.YData(1:2));               
            else
                warning('The length of the Y-coordinate vector doesn''t match the number of rows in the image.');
                fp.dy = diff(fp.himg.XData([1,end]))/( nRows - 1 );
