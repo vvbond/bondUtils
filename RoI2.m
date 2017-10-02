@@ -4,16 +4,37 @@ classdef RoI2 < handle
 % Usage
 % =====
 %   roi = RoI2
-%   roi = RoI2(type)
-%   roi = RoI2(type, hfig)
+%   roi = RoI2(hfig)
 %
 % Input (optional)
 % ----------------
-%  type     - 0 - rectangular, 1 - parallelogram region. Default, 0.
 %  hfig     - handle of the figure for which a RoI2 tool should be created. Default, current figure (gcf).
 %
+% Properties
+% ==========
+%  shape    - scalar: 0 - rectangular region;
+%                     1 - parallelogram with an x- or y-axis parallel side.
+%                         I.e., either horizontally or vertically extruded.
+%  xrng     - 2-vector of [min max] x-coordinate of the ROI bounding box.
+%  yrng     - 2-vector of [min max] y-coordinate of the ROI bounding box.
+%  p        - 2-by-k matrix of [x; y] coordinates of k points defining the ROI. 
+%             For the rectangular shape, k = 2. For parallelogram, k = 4.
+%  height   - heigth and
+%  width      width of the ROI.
+%  p_ix     - points, and x/y ranges of the ROI 
+%  xrng_ix    in the units of image indices.
+%  yrng_ix 
+%  userFcn  - function handle of a user-supplied function (see below).
+%
+% Methods
+% =======
+%  [X, Y] = roi.samplegrid(dx, dy)  - Generate a 2D grid sampling the ROI with given dx, dy (for now, supported by parallelogram ROIs only).
+%  [X, Y] = roi.samplegrid()        - Generate a 2D sampling grid at image resolution.
+%  D = roi.resample(dx, dy)         - Resample the ROI at the sampling grid of dx, dy.
+%  D = roi.resample()               - Resample the ROI at the resolution of the underlying image.
+%
 % User function
-% -------------
+% =============
 %  userFcn = f(src, evt)
 %   src - the RoI2 object
 %   evt - one of these strings: 'roi2_created_rectangle', 'roi2_created_parallelogram', 'roi2_resize', 'roi2_resized', 'roi2_move', 'roi2_moved', 'roi2_deleted'.
@@ -21,16 +42,26 @@ classdef RoI2 < handle
 % Example:
 % 1) Basic usage. 
 %    figure; imagesc(peaks(100)); roi = RoI2
-%    figure; imagesc(peaks(200)); roi = RoI2(1)
+%
 % 2) User function:
 %    roi = RoI2; roi.userFcn = @(src,evt) disp(evt);
+%
+% 3) Sampling grid:
+%    figure; imagesc(peaks(50)); roi = RoI2;     % Specify a parallelogram ROI.
+%    [X, Y] = roi.samplegrid; 
+%    hold on; plot(X(:), Y(:), 'r.');           % Visualize sampling grid.
+%
+% 4) ROI resampling
+%    figure; imagesc(peaks(50)); roi = RoI2;     % Specify a parallelogram ROI.
+%    D = roi.resample;
+%    figure; imagesc(D);
 
     %% (c) Vladimir Bondarenko, http://www.mathworks.co.uk/matlabcentral/fileexchange/authors/52876
     
     properties
-        p           % Depends on the type: 
-                    %  in rectangular ROI type (type = 0), p is a  2x2 matrix of [p_tl p_br] points;
-                    %  in parallelogram type (type = 1), p is a 4x4 matrix of of end points of 
+        p           % Depends on the shape: 
+                    %  in rectangular ROI shape (shape = 0), p is a  2x2 matrix of [p_tl p_br] points;
+                    %  in parallelogram shape (shape = 1), p is a 4x4 matrix of of end points of 
                     %  the principle lines, [p11 p12 p21 p22].
         xrng        % ROI x range.
         yrng        % ROI y range.
@@ -39,8 +70,14 @@ classdef RoI2 < handle
         lineStyle   % style of the line.
         lineColor   % color of the lines.
         lineWidth   % width of the line.
-        type        % ROI type: 0 - rectangular, 1 - parallelogram.
         userFcn     % user-defined function.
+    end
+    properties(SetObservable)
+        shape        % ROI shape: 0 - rectangular, 1 - parallelogram.
+    end
+    properties(Dependent)
+        height
+        width
     end
     
     properties(Hidden = true)
@@ -63,7 +100,7 @@ classdef RoI2 < handle
         
         % Interactions:
         clicks      % clicks counter.
-        shape       % shape of the parallelogram (type = 1): 1 -  horizontaly, 2 - verticaly extruded.
+        type       % type of the parallelogram (shape = 1): 1 -  horizontaly, 2 - verticaly extruded.
         lineIx      % index of the selected line in the hline array.
         old_cpos    % store cursor position for line movement.
         old_p       % store the ROI points matrix, p.
@@ -86,48 +123,59 @@ classdef RoI2 < handle
     
     methods
         %% Constructor
-        function xyr = RoI2(type, hfig)
+        function xyr = RoI2(hfig)
             
+            narginchk(0,1);
             % Parse input:
             if nargin == 0
                 xyr.hfig  = gcf;
-                xyr.type = 0;
             elseif nargin == 1 
-                xyr.hfig = gcf;
-                xyr.type = type;
-            else
                 xyr.hfig = hfig;
-                xyr.type = type;
             end
+                        
+            % Create toggle buttons:
+            rectIcon_fname = 'roi2Icon_rect.mat';
+            parIcon_fname = 'roi2Icon_par.mat';
+
+            rectIcon = load(fullfile(fileparts(mfilename('fullpath')),'icons', rectIcon_fname));
+            parIcon = load(fullfile(fileparts(mfilename('fullpath')),'icons', parIcon_fname));
             
-            % Create toggle button:
-            if xyr.type == 0
-                icon_fname = 'roi2Icon_rect.mat';
-            elseif xyr.type == 1
-                icon_fname = 'roi2Icon_par.mat';
-            end
-            xyroiIcon = load(fullfile(fileparts(mfilename('fullpath')),'icons', icon_fname));
-            
-            % Look if the button is already there:
+            % Look if the buttons are already there:
             xyr.htbar = findall(xyr.hfig, 'Tag', 'FigureToolBar');
-            roiBtn = findall(xyr.htbar, 'Tag', 'roi2_btn');
-            if ~isempty(roiBtn)
+            roiRectBtn = findall(xyr.htbar, 'Tag', 'roi2_rectangle_btn');
+            roiParBtn = findall(xyr.htbar, 'Tag', 'roi2_parallelogram_btn');
+            if ~isempty(roiRectBtn)
                 % Remove previous roi lines if any:
                 delete(findall(xyr.hfig, 'Tag', 'roi2_line'));
-                xyr.hbtn = roiBtn;
+                xyr.hbtn = roiRectBtn;
                 set(xyr.hbtn, 'onCallback',  @(src,evt) roiOn(xyr,src,evt),...
                               'offCallback', @(src,evt) roiOff(xyr,src,evt),...
-                              'CData', xyroiIcon.cdata,...
+                              'CData', rectIcon.cdata,...
                               'State', 'off',...
-                              'UserData', xyr.type);
+                              'UserData', 1);
             else
-                xyr.hbtn =  uitoggletool(xyr.htbar(1),  'CData', xyroiIcon.cdata, ...
-                                                        'onCallback',  @(src,evt) roiOn(xyr,src,evt),...
-                                                        'offCallback', @(src,evt) roiOff(xyr,src,evt),...
-                                                        'Separator', 'on',...
-                                                        'tooltipString', 'Region of interest',...
-                                                        'Tag', 'roi2_btn');                
+                xyr.hbtn = uitoggletool(xyr.htbar(1),  'CData', rectIcon.cdata, ...
+                                                       'onCallback',  @(src,evt) roiOn(xyr, 0, src, evt),...
+                                                       'offCallback', @(src,evt) roiOff(xyr, src, evt),...
+                                                       'Separator', 'on',...
+                                                       'tooltipString', 'Region of interest',...
+                                                       'Tag', 'roi2_rectangle_btn');                
             end
+            if ~isempty(roiParBtn)
+                xyr.hbtn(2) = roiParBtn;
+                set(xyr.hbtn(2), 'onCallback',  @(src,evt) roiOn(xyr,src,evt),...
+                                 'offCallback', @(src,evt) roiOff(xyr,src,evt),...
+                                 'CData', parIcon.cdata,...
+                                 'State', 'off' );
+            else
+                xyr.hbtn(2) =  uitoggletool(xyr.htbar(1),  'CData', parIcon.cdata, ...
+                                                        'onCallback',  @(src,evt) roiOn(xyr, 1, src, evt),...
+                                                        'offCallback', @(src,evt) roiOff(xyr, src, evt),...
+                                                        'Separator', 'off',...
+                                                        'tooltipString', 'Region of interest',...
+                                                        'Tag', 'roi2_parallelogram_btn');                
+            end
+
             % Defaults:                                
             xyr.clicks = 0;
             xyr.lineStyle = '-';
@@ -135,7 +183,7 @@ classdef RoI2 < handle
             xyr.lineWidth = 2;
             xyr.x2y = zeros(2,1);
             xyr.y2x = zeros(2,1);
-            xyr.shape = 0;
+            xyr.type = 0;
             xyr.axlims = axis;
             
             % If a figure has an image, grab its handle:
@@ -173,13 +221,16 @@ classdef RoI2 < handle
                    xyr.dyy = diff(xyr.himg.XData([1,end]))/( nRows - 1 );
                end
             end
+            
+            % Listeners:
+            addlistener(xyr, 'shape', 'PostSet', @(src, evt) xyr.shape_PostSet_cb);
         end
         
         %% Destructor
         function delete(xyr)
             
             % Delete the tool's button if it was not taken over by a new RoI object:
-            if ishandle(xyr.hbtn) && isempty(xyr.hbtn.UserData), delete(xyr.hbtn); end
+            if ishandle(xyr.hbtn(1)) && isempty(xyr.hbtn(1).UserData), delete(xyr.hbtn); end
             % Delete the ROI.
             if ishandle(xyr.hline), delete(xyr.hline); end
             % Restore figure keyboard events:
@@ -189,19 +240,21 @@ classdef RoI2 < handle
         end
         
         %% ROI On/Off callbacks
-        function roiOn(xyr,~,~)
-            newroi(xyr);
+        function roiOn(xyr, shape, ~,~)
+            xyr.shape = shape;
         end
         
         function roiOff(xyr,~,~)
            
             % Delete the ROI.
             if ishandle(xyr.hline), delete(xyr.hline); end
-            xyr.shape = 0;
-            xyr.hbtn.State = 'off';
+            xyr.type = 0;
             
             % Restore figure keyboard events:
-            set(xyr.hfig, 'KeyPressFcn', xyr.old_keyPressCb, 'KeyReleaseFcn', xyr.old_keyReleaseCb);
+            set(xyr.hfig, 'KeyPressFcn', xyr.old_keyPressCb,... 
+                          'KeyReleaseFcn', xyr.old_keyReleaseCb);
+            set(xyr.hfig, 'WindowButtonDownFcn', xyr.old_bdcb,...
+                          'WindowButtonUpFcn',   xyr.old_bucb);
             
             % Call the user-defined function:
                 if ~isempty(xyr.userFcn)
@@ -214,7 +267,7 @@ classdef RoI2 < handle
         function xyr = newroi(xyr)
             
             % Disable other interactive tools:
-            zoom off, pan off, datacursormode off, plotedit off
+            xyr.interactivesOff(xyr.hfig);
             
             % Delete the previous roi:
             if ishandle(xyr.hline)
@@ -222,11 +275,11 @@ classdef RoI2 < handle
             end
                         
             % Store previous interaction callbacks:
-            xyr.old_bdcb = get(gcf,'WindowButtonDownFcn');
-            xyr.old_bmcb = get(gcf,'WindowButtonMotionFcn');
-            xyr.old_bucb = get(gcf,'WindowButtonUpFcn');
-            xyr.old_keyPressCb   = get(gcf, 'KeyPressFcn');
-            xyr.old_keyReleaseCb = get(gcf, 'KeyReleaseFcn');
+            xyr.old_bdcb = get(xyr.hfig, 'WindowButtonDownFcn');
+            xyr.old_bmcb = get(xyr.hfig, 'WindowButtonMotionFcn');
+            xyr.old_bucb = get(xyr.hfig, 'WindowButtonUpFcn');
+            xyr.old_keyPressCb   = get(xyr.hfig, 'KeyPressFcn');
+            xyr.old_keyReleaseCb = get(xyr.hfig, 'KeyReleaseFcn');
 
 
             % Clear the mouse event handlers:
@@ -249,12 +302,12 @@ classdef RoI2 < handle
             hold on;
         end
         
-        %% Window button down callback
+        %% Window button up callback
         function roi_bucb(xyr,~,~)
             
             xyr.clicks = xyr.clicks+1;
             
-            switch xyr.type
+            switch xyr.shape
                 case 0
                     roiCreateRectangle(xyr);
                 case 1
@@ -265,7 +318,7 @@ classdef RoI2 < handle
         %% Window button motion function
         function roi_bmcb(xyr,~,~)
             
-            switch xyr.type
+            switch xyr.shape
                 case 0
                     roiDrawRectangle(xyr);
                 case 1
@@ -281,7 +334,6 @@ classdef RoI2 < handle
             xyr.old_p = xyr.p;
             
             % Store previous interaction callbacks:
-            xyr.old_bdcb = get(gcf,'WindowButtonDownFcn');
             xyr.old_bmcb = get(gcf,'WindowButtonMotionFcn');
             xyr.old_bucb = get(gcf,'WindowButtonUpFcn');
             
@@ -299,7 +351,7 @@ classdef RoI2 < handle
             cpos = cpos(1,1:2)';
             dxdy = cpos - xyr.old_cpos;     % shift vector.
             
-            switch xyr.type
+            switch xyr.shape
                 case 0
                     if xyr.lineIx <= 2 % horizontal lines.
                         shiftV = dxdy.*[0; 1]; % change only the y-coordinate
@@ -310,7 +362,7 @@ classdef RoI2 < handle
                     end
                 case 1
                     if xyr.lineIx <=2
-                        switch xyr.shape
+                        switch xyr.type
                             case 1
                                 pIx = (xyr.lineIx-1)*2 + [1 2]; % point indices, i.e., columns in the xyr.p matrix.
                                 shiftV = [1 1; 0 0]*dxdy(1);    % shift vector.
@@ -380,7 +432,8 @@ classdef RoI2 < handle
         function roiMove_bucb(xyr,~,~)
         % Movement complete.
         
-            set(xyr.hfig, 'windowButtonMotionFcn', xyr.old_bmcb, ...
+            set(xyr.hfig, 'windowButtonMotionFcn', xyr.old_bmcb,...
+                          'WindowButtonUpFcn',     xyr.old_bdcb,...  
                           'Pointer', 'arrow');
                       
             % Call the user-defined function:
@@ -400,17 +453,19 @@ classdef RoI2 < handle
             v1 = ones(1, size(xyr.p, 2));
             new_p = xyr.old_p + shiftV*v1;
             
-            % Check if the ROI exceeds axes limits:
-            if all([new_p(1,:)>=xyr.axlims(1), new_p(1,:)<=xyr.axlims(2),...
-                    new_p(2,:)>=xyr.axlims(3), new_p(2,:)<=xyr.axlims(4)])
-                xyr.p = new_p;
-                xyr.update();
-               
-                % Call the user-defined function:
-                if ~isempty(xyr.userFcn)
-                    evt = 'roi2_move';
-                    xyr.userFcn(xyr, evt);
-                end
+            % Clip ROI to the axes limits:
+            if all([new_p(1,:)>=xyr.axlims(1), new_p(1,:)<=xyr.axlims(2)])
+                xyr.p(1,:) = new_p(1,:);
+            end
+            if all([new_p(2,:)>=xyr.axlims(3), new_p(2,:)<=xyr.axlims(4)])
+                xyr.p(2,:) = new_p(2,:);
+            end
+            xyr.update();
+
+            % Call the user-defined function:
+            if ~isempty(xyr.userFcn)
+                evt = 'roi2_move';
+                xyr.userFcn(xyr, evt);
             end
         end
         
@@ -459,7 +514,7 @@ classdef RoI2 < handle
         function update(xyr)
             
             % Update plot:
-            switch xyr.type
+            switch xyr.shape
                 case 0
                     set(xyr.hline(1), 'xdata', xyr.p(1,1:2), 'ydata', xyr.p(2,[1 1]));
                     set(xyr.hline(2), 'xdata', xyr.p(1,1:2), 'ydata', xyr.p(2,[2 2]));
@@ -498,6 +553,7 @@ classdef RoI2 < handle
             
             cpos = get(gca, 'currentPoint');
             if xyr.clicks == 1
+                xyr.p = zeros(2);
                 xyr.p(:,1) = cpos(1,1:2)';
                 % Clip the cursor position by the axes limits:
                 clip = [ xyr.p(1,1) - xyr.axlims(1)
@@ -525,6 +581,17 @@ classdef RoI2 < handle
             else
                 xyr.clicks = 0;
                 
+                % Restore figure settings:
+                set(xyr.hfig, 'windowButtonMotionFcn', xyr.old_bmcb );
+                set(xyr.hfig, 'windowButtonUpFcn',     xyr.old_bucb );
+%                 set(xyr.hfig, 'windowButtonDownFcn',   xyr.old_bdcb );
+                set(xyr.hfig, 'pointer', xyr.old_fpointer);
+                set(gca, 'NextPlot', xyr.old_NextPlot);
+                
+                % Activate interaction:
+                set(xyr.hline, 'buttonDownFcn', @(src,evt) line_bdcb(xyr,src,evt));
+                set(xyr.hfig, 'windowButtonDownFcn', @(src,evt) roiMove_bdcb(xyr, src,evt));
+                
                 % Compute the x- and y- ranges:
                 xyr.xrng = [min(xyr.p(1,:)) max(xyr.p(1,:))];
                 xyr.yrng = [min(xyr.p(2,:)) max(xyr.p(2,:))];
@@ -536,17 +603,6 @@ classdef RoI2 < handle
                     xyr.xrng_ix = round((xyr.xrng - xyr.p0(1)*v1)./[xyr.dxx xyr.dxx])+1;
                     xyr.yrng_ix = round((xyr.yrng - xyr.p0(2)*v1)./[xyr.dyy xyr.dyy])+1;
                 end
-
-                % Restore figure settings:
-                set(xyr.hfig, 'windowButtonMotionFcn', xyr.old_bmcb );
-                set(xyr.hfig, 'windowButtonUpFcn',     xyr.old_bucb );
-%                 set(xyr.hfig, 'windowButtonDownFcn',   xyr.old_bdcb );
-                set(xyr.hfig, 'pointer', xyr.old_fpointer);
-                set(gca, 'NextPlot', xyr.old_NextPlot);
-                
-                % Activate interaction:
-                set(xyr.hline, 'buttonDownFcn', @(src,evt) line_bdcb(xyr,src,evt));
-                set(xyr.hfig, 'windowButtonDownFcn', @(src,evt) roiMove_bdcb(xyr, src,evt));
                 
                 % Call the user-defined function:
                 if ~isempty(xyr.userFcn)
@@ -585,6 +641,7 @@ classdef RoI2 < handle
             cpos = get(gca, 'currentPoint');
             switch xyr.clicks
                 case 1
+                    xyr.p = zeros(2,4);
                     xyr.p(:,1) = cpos(1,1:2)';
                     % Clip the cursor position by the axes limits:
                     clip = [ xyr.p(1,1) - xyr.axlims(1)
@@ -616,7 +673,7 @@ classdef RoI2 < handle
                     % Restore figure settings:
                     set(xyr.hfig, 'windowButtonMotionFcn', xyr.old_bmcb );
                     set(xyr.hfig, 'windowButtonUpFcn',     xyr.old_bucb );
-                    set(xyr.hfig, 'windowButtonDownFcn',   xyr.old_bdcb );
+%                     set(xyr.hfig, 'windowButtonDownFcn',   xyr.old_bdcb );
                     set(xyr.hfig, 'pointer', xyr.old_fpointer);
                     set(gca, 'NextPlot', xyr.old_NextPlot);
                     
@@ -636,7 +693,7 @@ classdef RoI2 < handle
 
                     % Call the user-defined function:
                     if ~isempty(xyr.userFcn)
-                        evt = 'roi2_created_rectangle';
+                        evt = 'roi2_created_parallelogram';
                         xyr.userFcn(xyr, evt);
                     end
             end            
@@ -663,11 +720,11 @@ classdef RoI2 < handle
                     dy = cpos(1,2)-xyr.p(2,2);
                     if abs(dy)/diff(ylim) > abs(dx)/diff(xlim)
                         % vertical extrude:
-                        xyr.shape = 2;
+                        xyr.type = 2;
                         xyr.p(:,3:4) = xyr.p(:,1:2) + [0 0; 1 1]*dy;
                     else
                         % horizontal extrude:
-                        xyr.shape = 1;
+                        xyr.type = 1;
                         xyr.p(:,3:4) = xyr.p(:,1:2) + [1 1; 0 0]*dx;
                     end
                     % update second line:
@@ -681,7 +738,7 @@ classdef RoI2 < handle
         end
                 
         %% Sample ROI
-        function [D, xroi, yroi] = sample(xyr)
+        function [D, xdata, ydata] = resample(xyr, varargin)
             
             % Sanity check:
             if ~ishandle(xyr.himg)
@@ -689,23 +746,151 @@ classdef RoI2 < handle
                 return;
             end
             
-            switch xyr.type
+            switch xyr.shape
                 case 0      % Rectangular ROI => simple extraction.
                     x_ix = xyr.xrng_ix(1):xyr.xrng_ix(2);
                     y_ix = xyr.yrng_ix(1):xyr.yrng_ix(2);
                     D = xyr.himg.CData(y_ix, x_ix);
                     if nargout > 1
                         try
-                            xroi = xyr.himg.XData(x_ix);
-                            yroi = xyr.himg.YData(y_ix);
-                        catch M
-                            warning(['Couldn''t extract axes coordinates. ' M.message]);
-                            xroi = []; yroi = [];
+                            xdata = xyr.himg.XData(x_ix);
+                            ydata = xyr.himg.YData(y_ix);
+                        catch ME
+                            warning('RoI2:inconsistentAxesData', 'RoI2: Couldn''t extract axes coordinates. %s', ME.message);
+                            xdata = []; ydata = [];
                         end
                     end
                 case 1
+                    [X, Y] = xyr.samplegrid(varargin{:});
+                    % Nearest neighbour search:
+                    x_ix = floor( (X(:) - xyr.p0(1))/xyr.dxx ) + 1;
+                    y_ix = floor( (Y(:) - xyr.p0(2))/xyr.dyy ) + 1;
+                    D = xyr.himg.CData(sub2ind(size(xyr.himg.CData), y_ix, x_ix));
+                    D = reshape(D, size(X));
             end
         end
         
+        function [X, Y] = samplegrid(xyr, dx, dy)
+            
+            % Parse input:
+            if nargin == 1
+                dx = xyr.dxx;
+                dy = xyr.dyy;
+            elseif nargin == 2
+                dy = xyr.dyy;
+            end
+            
+            % Create sample grid: a set of lines each having nPoints.
+            switch xyr.shape
+                case 0
+                    warning('RoI2: ROI re-sampling for rectangular ROIs isn''t supported yet.');
+                    X = [];
+                    Y = [];
+                case 1
+                    if xyr.type == 1
+                        nPoints = round(xyr.height/dy);
+                        nLines  = round(xyr.width/dx);
+                        X = zeros(nPoints, nLines); Y = X;
+                    elseif xyr.type == 2
+                        nPoints = round(xyr.width/dx);
+                        nLines  = round(xyr.height/dy);
+                        X = zeros(nLines, nPoints); Y = X;
+                    else
+                        error('RoI2: unrecognized type parameter.');
+                    end                    
+                    tp = linspace(0, 1, nPoints);   % parametrization variable.
+                    tl = linspace(0, 1, nLines);
+                    for ii = 1:nLines
+                        tt = tl(ii);
+                        p1 = (1-tt)*xyr.p(:,1) + tt*xyr.p(:,3); % end points of the principle diagonal line.
+                        p2 = (1-tt)*xyr.p(:,2) + tt*xyr.p(:,4);
+                        pts = (1-tp).*p1 + tp.*p2;
+                        if xyr.type == 1
+                            X(:,ii) = pts(1,:)'; Y(:,ii) = pts(2,:)';
+                        elseif xyr.type == 2
+                            X(ii,:) = pts(1,:); Y(ii,:) = pts(2,:);
+                        else
+                            error('RoI2: unrecognized type parameter.');
+                        end
+                    end
+            end
+        end
+    end
+    %% Setters & Getters
+    methods
+        function val = get.width(xyr)
+            switch xyr.shape
+                case 0
+                    val = abs(diff(xyr.p(1,:)));
+                case 1
+                    if xyr.type == 1
+                        val = abs(diff(xyr.p(1,[1, 3])));
+                    elseif xyr.type == 2
+                        val = abs(diff(xyr.p(1,[1, 2])));
+                    else
+                        error('RoI2: undefined type parameter.');
+                    end
+                    
+            end
+        end
+        
+        function val = get.height(xyr)
+            switch xyr.shape
+                case 0
+                    val = abs(diff(xyr.p(2,:)));
+                case 1
+                    if xyr.type == 1
+                        val = abs(diff(xyr.p(2,[1, 2])));
+                    elseif xyr.type == 2
+                        val = abs(diff(xyr.p(2,[1, 3])));
+                    else
+                        error('RoI2: undefined type parameter.');
+                    end
+            end            
+        end
+    end
+    
+    %% Listeners
+    methods
+        function shape_PostSet_cb(xyr)
+            
+            % Toggle buttons.
+            % Turn off all buttons:
+            if ~isempty(xyr.hbtn) && length(xyr.hbtn) > 1 && ishandle(xyr.hbtn(1))
+                for ii = 1:length(xyr.hbtn)
+                    xyr.hbtn(ii).State = 'off';
+                end
+            else
+                return;
+            end
+            
+            % Turn on the one according to the shape parameter:
+            xyr.hbtn(min(xyr.shape+1, length(xyr.hbtn))).State = 'on';
+            
+            % Create new ROI:
+            newroi(xyr);
+        end
+    end
+    
+        %% Static
+    methods(Static)
+        function interactivesOff(hfig)
+        % Switch off interactive tools.
+            curfig = gcf;
+            figure(hfig)
+            plotedit off, zoom off, pan off, rotate3d off, datacursormode off, brush off
+            figure(curfig)
+        end
+        
+        function escape(hfig)
+        % Emergency: clear all interaction callbacks.
+            if ishandle(hfig)                
+                set(hfig, 'WindowButtonMotionFcn', [], ...
+                          'WindowButtonUpFcn',     [], ... 
+                          'WindowButtonDownFcn',   [], ...
+                          'KeyPressFcn',           [], ...
+                          'KeyReleaseFcn',         [] );
+            end            
+        end
     end
 end
