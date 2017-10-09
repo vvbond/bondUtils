@@ -68,17 +68,19 @@ classdef RoI2 < handle
         yrng        % ROI y range.
         x2y         % 2-vector of coefficients, [a; b], of the equation y(x) = a*x+b.
         y2x         % 2-vector of coefficients, [c; d], of the equation x(y) = c*y+d.
-        lineStyle   % style of the line.
-        lineColor   % color of the lines.
-        lineWidth   % width of the line.
         userFcn     % user-defined function.
     end
     properties(SetObservable)
         shape        % ROI shape: 0 - rectangular, 1 - parallelogram.
+        lineStyle   % style of the line.
+        lineColor   % color of the lines.
+        lineWidth   % width of the line.        
     end
     properties(Dependent)
         height
         width
+        height_ix
+        width_ix
     end
     properties(Hidden = true)
         % Various handles:
@@ -110,8 +112,7 @@ classdef RoI2 < handle
         himg        % handle of an image if it exist in the figure.
         p0          % coordinates of the image origin.
         dxx         % increment on the x-axis.
-        dyy         % increment on the y-axis.
-        
+        dyy         % increment on the y-axis.   
     end
     properties
         p_ix        % matrix of image indices corresponding to p.
@@ -222,6 +223,9 @@ classdef RoI2 < handle
             
             % Listeners:
             addlistener(xyr, 'shape', 'PostSet', @(src, evt) xyr.shape_PostSet_cb);
+            addlistener(xyr, 'lineStyle', 'PostSet', @(src, evt) xyr.appearance_PostSet_cb);
+            addlistener(xyr, 'lineColor', 'PostSet', @(src, evt) xyr.appearance_PostSet_cb);
+            addlistener(xyr, 'lineWidth', 'PostSet', @(src, evt) xyr.appearance_PostSet_cb);
         end
         
         %% Destructor
@@ -823,6 +827,7 @@ classdef RoI2 < handle
                     end
             end
         end
+        
     end
     %% Setters & Getters
     methods
@@ -837,11 +842,25 @@ classdef RoI2 < handle
                         val = abs(diff(xyr.p(1,[1, 2])));
                     else
                         error('RoI2: undefined type parameter.');
-                    end
-                    
+                    end                    
             end
         end
         
+        function val = get.width_ix(xyr)
+            switch xyr.shape
+                case 0
+                    val = abs(diff(xyr.p_ix(1,:))) + 1;
+                case 1
+                    if xyr.type == 1
+                        val = abs(diff(xyr.p_ix(1,[1, 3]))) + 1;
+                    elseif xyr.type == 2
+                        val = abs(diff(xyr.p_ix(1,[1, 2]))) + 1;
+                    else
+                        error('RoI2: undefined type parameter.');
+                    end                    
+            end
+        end
+                
         function val = get.height(xyr)
             switch xyr.shape
                 case 0
@@ -851,6 +870,21 @@ classdef RoI2 < handle
                         val = abs(diff(xyr.p(2,[1, 2])));
                     elseif xyr.type == 2
                         val = abs(diff(xyr.p(2,[1, 3])));
+                    else
+                        error('RoI2: undefined type parameter.');
+                    end
+            end            
+        end
+        
+        function val = get.height_ix(xyr)
+            switch xyr.shape
+                case 0
+                    val = abs(diff(xyr.p_ix(2,:))) + 1;
+                case 1
+                    if xyr.type == 1
+                        val = abs(diff(xyr.p_ix(2,[1, 2]))) + 1;
+                    elseif xyr.type == 2
+                        val = abs(diff(xyr.p_ix(2,[1, 3]))) + 1;
                     else
                         error('RoI2: undefined type parameter.');
                     end
@@ -878,9 +912,15 @@ classdef RoI2 < handle
             % Create new ROI:
             newroi(xyr);
         end
+        
+        function appearance_PostSet_cb(xyr)
+            if ishandle(xyr.hline)
+                set(xyr.hline, 'LineWidth', xyr.lineWidth, 'Color', xyr.lineColor);
+            end
+        end
     end
     
-        %% Static
+    %% Static
     methods(Static)
         function interactivesOff(hfig)
         % Switch off interactive tools.
