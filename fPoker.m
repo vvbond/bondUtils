@@ -7,7 +7,7 @@ classdef fPoker < handle
         p           % 1-by-2 vector of pointer x and y coordinates.
         pix         % for images only, 1-by-2 vector of pointer x and y indices.
         hfig        % asociated figure handle.
-        hax         % handle to the current axes.
+
         format      % text format.
         color       % text color.
         padding     % 1-by-2 vector of padding along x and y coordinates, [px].
@@ -18,12 +18,13 @@ classdef fPoker < handle
         bmfun       % cell array of function handles, to be executed at the button (mouse) motion event.
         bdfun       % cell array of function handles, to be executed at the buttond down (i.e., click) event.
         bufun       % cell array of function handles, to be executed at the buttond up event.
+        xplot
+        yplot        
     end
     
     % Image-related properties:
     properties(Hidden = true)
-        xplot
-        yplot
+        hax         % handle to the current axes.
         himg        % handle to the image in the figure.
         p0          % coordinates of the image origin.
         dx          % increment on the x-axis.
