@@ -1,4 +1,4 @@
-function splots(D, nplots, batchNum)
+function plotcols(D, nplots, batchNum)
 % Plot columns of D in a number of subplots.
     
     if nargin == 1
