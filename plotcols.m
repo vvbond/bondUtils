@@ -1,14 +1,18 @@
 function plotcols(D, nplots, batchNum)
 % Plot columns of D in a number of subplots.
-    
+
+    htbar = findall(gcf, 'Tag', 'FigureToolBar');    
+    rightIcon = load(fullfile(fileparts(mfilename('fullpath')),'icons', 'rightIcon.mat'));
+    leftIcon = load(fullfile(fileparts(mfilename('fullpath')),'icons', 'leftIcon.mat'));
+    lbtn = uipushtool(htbar, 'CData', leftIcon.cdata,  'tag',  'leftArrowBtn');
+    rbtn = uipushtool(htbar, 'CData', rightIcon.cdata, 'tag', 'rightArrowBtn');
+
     if nargin == 1
         nplots = 6;
         batchNum = 1;
     elseif nargin == 2
         batchNum = 1;
     end
-
-    startCol = (batchNum-1)*nplots;
     
     % Find nrows and ncols, such that nrows*ncols >= n, and nrows \approx ncols.
     ncols = 2;
@@ -20,11 +24,22 @@ function plotcols(D, nplots, batchNum)
     end
     
     [~, n] = size(D);
-    for ii=1:nplots
-        subplot(nrows, ncols, ii);
-        colIx = ii+startCol;
-        if colIx <= n
-            plot(D(:, ii+startCol));
+    
+    subplots(batchNum);
+    
+    
+    
+    function subplots(batchNum)
+        startCol = (batchNum-1)*nplots;
+        for ii=1:nplots
+            subplot(nrows, ncols, ii);
+            colIx = ii+startCol;
+            if colIx > 0 && colIx <= n
+                plot(D(:, colIx));
+                title(colIx);
+            end
         end
+        lbtn.ClickedCallback = @(src, evt) subplots(batchNum-1);
+        rbtn.ClickedCallback = @(src, evt) subplots(batchNum+1);
     end
 end
