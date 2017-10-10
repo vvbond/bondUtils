@@ -21,8 +21,8 @@ classdef RoI2 < handle
 %             For the rectangular shape, k = 2. For parallelogram, k = 4.
 %  height   - heigth and
 %  width      width of the ROI.
-%  p_ix     - points, and x/y ranges of the ROI 
-%  xrng_ix    in the units of image indices.
+%  p_ix     - points, and x/y ranges of the ROI in
+%  xrng_ix    the units of image indices.
 %  yrng_ix 
 %  userFcn  - function handle of a user-supplied function (see below).
 %
@@ -38,7 +38,13 @@ classdef RoI2 < handle
 % =============
 %  userFcn = f(src, evt)
 %   src - the RoI2 object
-%   evt - one of these strings: 'roi2_created_rectangle', 'roi2_created_parallelogram', 'roi2_resize', 'roi2_resized', 'roi2_move', 'roi2_moved', 'roi2_deleted'.
+%   evt - one of these strings: 'roi2_created_rectangle', 
+%                               'roi2_created_parallelogram', 
+%                               'roi2_resize', 
+%                               'roi2_resized', 
+%                               'roi2_move', 
+%                               'roi2_moved', 
+%                               'roi2_deleted'.
 %
 % Example:
 % 1) Basic usage. 
@@ -50,12 +56,14 @@ classdef RoI2 < handle
 % 3) Sampling grid:
 %    figure; imagesc(peaks(50)); roi = RoI2;     % Specify a parallelogram ROI.
 %    [X, Y] = roi.samplegrid; 
-%    hold on; plot(X(:), Y(:), 'r.');           % Visualize sampling grid.
+%    hold on; plot(X(:), Y(:), 'r.');            % Visualize sampling grid.
 %
 % 4) ROI resampling
 %    figure; imagesc(peaks(50)); roi = RoI2;     % Specify a parallelogram ROI.
 %    D = roi.resample;
 %    figure; imagesc(D);
+%
+% See also: RoI1, fPoker.
 
     %% (c) Vladimir Bondarenko, http://www.mathworks.co.uk/matlabcentral/fileexchange/authors/52876
     
@@ -679,19 +687,22 @@ classdef RoI2 < handle
                     set(xyr.hfig, 'pointer', xyr.old_fpointer);
                     set(gca, 'NextPlot', xyr.old_NextPlot);
                     
-                    % Get the coefficients of the principle ROI line (y = a*x+b; x = c*y+d):
-                    xyr.xrng = [min(xyr.p(1,:)) max(xyr.p(1,:))];
-                    xyr.yrng = [min(xyr.p(2,:)) max(xyr.p(2,:))];
-                    % Coefficients of the y = a*x+b line:
-                    xyr.x2y = [ diff(xyr.p(2,[1 2]));
-                               -det(xyr.p(:,[1 2]))  ]/diff(xyr.p(1,[1 2]));
-                    % Coefficients of the x = c*y+d line:
-                    xyr.y2x = [ diff(xyr.p(1,1:2));
-                                det(xyr.p(:,[1 2]))  ]/diff(xyr.p(2,[1 2]));
+%                     % Get the coefficients of the principle ROI line (y = a*x+b; x = c*y+d):
+%                     xyr.xrng = [min(xyr.p(1,:)) max(xyr.p(1,:))];
+%                     xyr.yrng = [min(xyr.p(2,:)) max(xyr.p(2,:))];
+%                     % Coefficients of the y = a*x+b line:
+%                     xyr.x2y = [ diff(xyr.p(2,[1 2]));
+%                                -det(xyr.p(:,[1 2]))  ]/diff(xyr.p(1,[1 2]));
+%                     % Coefficients of the x = c*y+d line:
+%                     xyr.y2x = [ diff(xyr.p(1,1:2));
+%                                 det(xyr.p(:,[1 2]))  ]/diff(xyr.p(2,[1 2]));
+                    
                     
                     % Activate interaction:
                     set(xyr.hline, 'buttonDownFcn', @(src,evt) line_bdcb(xyr,src,evt));
                     set(xyr.hfig, 'windowButtonDownFcn', @(src,evt) roiMove_bdcb(xyr, src,evt));
+                    
+                    xyr.update();
 
                     % Call the user-defined function:
                     if ~isempty(xyr.userFcn)
