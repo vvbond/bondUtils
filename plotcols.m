@@ -2,11 +2,20 @@ function plotcols(D, nplots, batchNum)
 % Plot columns of D in a number of subplots.
 
     htbar = findall(gcf, 'Tag', 'FigureToolBar');    
-    rightIcon = load(fullfile(fileparts(mfilename('fullpath')),'icons', 'rightIcon.mat'));
-    leftIcon = load(fullfile(fileparts(mfilename('fullpath')),'icons', 'leftIcon.mat'));
-    lbtn = uipushtool(htbar, 'CData', leftIcon.cdata,  'tag',  'leftArrowBtn');
-    rbtn = uipushtool(htbar, 'CData', rightIcon.cdata, 'tag', 'rightArrowBtn');
+    
+    lbtn = findall(gcf, 'Tag', 'leftArrowBtn');
+    rbtn = findall(gcf, 'Tag', 'rightArrowBtn');
 
+    if isempty(lbtn)
+        leftIcon = load(fullfile(fileparts(mfilename('fullpath')),'icons', 'leftIcon.mat'));
+        lbtn = uipushtool(htbar, 'CData', leftIcon.cdata,  'tag',  'leftArrowBtn');
+    end
+        
+    if isempty(rbtn)
+        rightIcon = load(fullfile(fileparts(mfilename('fullpath')),'icons', 'rightIcon.mat'));
+        rbtn = uipushtool(htbar, 'CData', rightIcon.cdata, 'tag', 'rightArrowBtn');
+    end
+    
     if nargin == 1
         nplots = 6;
         batchNum = 1;
