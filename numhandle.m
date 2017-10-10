@@ -1,23 +1,24 @@
 classdef numhandle < handle
+% Container handle class for numeric data.
     properties
         data
     end
     %% {Con,De}structor
     methods
-        function nth = num2handle(num)
-            nth.data = num;
+        function nh = numhandle(num)
+            nh.data = num;
         end
     end
     %% Setter
     methods
-        function set(nth, val)
-            nth.data = val;
+        function set(nh, val)
+            nh.data = val;
         end
     end
     %% Operators overloading
     methods
-        function d = double(nth)
-            d = nth.data;
+        function d = double(nh)
+            d = nh.data;
         end
         
         function r = plus(obj1, obj2)
@@ -102,7 +103,6 @@ classdef numhandle < handle
             r = a ~= b;
         end
 
-        
         function r = lt(obj1, obj2)
             a = double(obj1);
             b = double(obj2);
