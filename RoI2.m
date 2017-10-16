@@ -550,6 +550,7 @@ classdef RoI2 < handle
             xyr.yrng = [min(xyr.p(2,:)) max(xyr.p(2,:))];
 
             % Find corresponding image indices:
+            xyr.p0 = [xyr.himg.XData(1); xyr.himg.YData(1)];
             if ishandle(xyr.himg)
                 v1 = ones(1, size(xyr.p, 2));
                 xyr.p_ix = round((xyr.p - xyr.p0*v1)./([xyr.dxx; xyr.dyy]*v1))+1;
@@ -606,13 +607,14 @@ classdef RoI2 < handle
                 xyr.xrng = [min(xyr.p(1,:)) max(xyr.p(1,:))];
                 xyr.yrng = [min(xyr.p(2,:)) max(xyr.p(2,:))];
                 
+                xyr.update();
                 % Find corresponding image indices:
-                if ishandle(xyr.himg)
-                    v1 = ones(1, size(xyr.p,2));
-                    xyr.p_ix = round((xyr.p - xyr.p0*v1)./([xyr.dxx; xyr.dyy]*v1))+1;
-                    xyr.xrng_ix = round((xyr.xrng - xyr.p0(1)*v1)./[xyr.dxx xyr.dxx])+1;
-                    xyr.yrng_ix = round((xyr.yrng - xyr.p0(2)*v1)./[xyr.dyy xyr.dyy])+1;
-                end
+%                 if ishandle(xyr.himg)
+%                     v1 = ones(1, size(xyr.p,2));
+%                     xyr.p_ix = round((xyr.p - xyr.p0*v1)./([xyr.dxx; xyr.dyy]*v1))+1;
+%                     xyr.xrng_ix = round((xyr.xrng - xyr.p0(1)*v1)./[xyr.dxx xyr.dxx])+1;
+%                     xyr.yrng_ix = round((xyr.yrng - xyr.p0(2)*v1)./[xyr.dyy xyr.dyy])+1;
+%                 end
                 
                 % Call the user-defined function:
                 if ~isempty(xyr.userFcn)
