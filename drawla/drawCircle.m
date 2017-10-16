@@ -29,7 +29,7 @@ function drawCircle(varargin)
 % Copyright (c) 2009, Dr. Vladimir Bondarenko <http://sites.google.com/site/bondsite>
 
 % Check input:
-error(nargchk(0,4,nargin));
+narginchk(0,4);
 
 % Defaults:
 N = 100; k = 0:N;       % Number of points on the circle(s)
@@ -59,10 +59,10 @@ for ii=1:nargin
     end 
 end
 % Check input
-if ~all(size(xc)==size(yc)), error('Dimensions of xc and yc must be equal.'); end;
+if ~all(size(xc)==size(yc)), error('Dimensions of xc and yc must be equal.'); end
 if ~isscalar(r)&&~all(size(xc)==size(r))
     error('Wrong dimensions of r. Must be scalar or matrix with dimensins of xc and yc'); 
-end;
+end
 % Parse the line parameters
 [lStyle,lWidth,lColor, lMarker] = parseLineType(lType);
     
@@ -84,20 +84,23 @@ end
 axis equal
 set(gca, 'NextPlot', holdon); % restore the NextPlot property
 
-function [lStyle,lWidth,lColor, lMarker] = parseLineType(lType)
-% Parse the line type
-% get line style
-lStyles = '--|:|-\.|-';
-[dum1,dum2,dum3, lStyle] = regexp(lType, lStyles, 'once');
-if isempty(lStyle), lStyle = 'none'; end
-% get width
-[dum1,dum2,dum3, lWidth] = regexp(lType, '\d*', 'once');
-if isempty(lWidth), lWidth = 1; else lWidth = str2double(lWidth); end
-% get color
-lColors = 'y|m|c|r|g|b|w|k';
-[dum1,dum2,dum3, lColor] = regexp(lType, lColors, 'once');
-if isempty(lColor), lColor = 'k'; end
-% get marker
-lMarkers = '\+|o|\*|\.|x|s|d|\^|>|<|v|p|h|';
-[dum1,dum2,dum3, lMarker] = regexp(lType, lMarkers, 'once');
-if isempty(lMarker), lMarker = 'none'; end
+
+    function [lStyle,lWidth,lColor, lMarker] = parseLineType(lType)
+    % Parse the line type
+        % get line style
+        lStyles = '--|:|-\.|-';
+        [~,~,~, lStyle] = regexp(lType, lStyles, 'once');
+        if isempty(lStyle), lStyle = 'none'; end
+        % get width
+        [~,~,~, lWidth] = regexp(lType, '\d*', 'once');
+        if isempty(lWidth), lWidth = 1; else, lWidth = str2double(lWidth); end
+        % get color
+        lColors = 'y|m|c|r|g|b|w|k';
+        [~,~,~, lColor] = regexp(lType, lColors, 'once');
+        if isempty(lColor), lColor = 'k'; end
+        % get marker
+        lMarkers = '\+|o|\*|\.|x|s|d|\^|>|<|v|p|h|';
+        [~,~,~, lMarker] = regexp(lType, lMarkers, 'once');
+        if isempty(lMarker), lMarker = 'none'; end
+    end
+end
