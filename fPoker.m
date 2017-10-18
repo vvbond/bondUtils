@@ -128,7 +128,7 @@ classdef fPoker < handle
                fp.himg.XData = linspace(fp.himg.XData(1), fp.himg.XData(2), nCols);
                fp.dx = diff(fp.himg.XData(1:2));
            else
-               warning('The length of the X-coordinate vector doesn''t match the number of columns in the image.');
+               warning('The length of the X-coordinate, %d, vector doesn''t match the number of columns in the image, %d.', length(fp.himg.XData), nCols);
                fp.dx = diff(fp.himg.XData([1,end]) )/( nCols - 1 );
            end
 
