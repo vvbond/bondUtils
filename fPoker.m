@@ -139,7 +139,7 @@ classdef fPoker < handle
                fp.himg.YData = linspace(fp.himg.YData(1), fp.himg.YData(2), nRows);
                fp.dy = diff(fp.himg.YData(1:2));               
            else
-               warning('The length of the Y-coordinate vector doesn''t match the number of rows in the image.');
+               warning('fPoker: length of the Y-coordinate vector, %d, doesn''t match the number of rows in the image, %d.', length(fp.himg.YData), nRows);
                fp.dy = diff(fp.himg.XData([1,end]))/( nRows - 1 );
            end
         end
