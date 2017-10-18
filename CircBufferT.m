@@ -1,35 +1,34 @@
 classdef CircBufferT < handle
-% Class implementing a circular buffer for arrays.
+% Circular buffer for typed data.
 %
 % Usage: 
-%  bfr = CircBuffer(elsz, numels);  % Create a buffer.
-%  bfr.push(el);                    % Push an element to the buffer.
-%  D = bfr.data;                    % Fetch buffer data.    
+%  bfr = CircBufferT(numels);  % Create a buffer.
+%  bfr.push(el);               % Push an element to the buffer.
+%  D = bfr.data;               % Fetch buffer data.    
 %
 % Examples:
 %   bfr = CircBuffer([1 1], 10); for ii=1:13, bfr.push(rand); disp(bfr.data); end
 
     properties
+        Q                   % buffer que: an array of structures, Q.el, where 'el' holds data of a single element.        
         elsz                % {2,3}-vector describing the size of indivudual elements in the buffer.
         numels              % scalar, number of elements in the buffer.
     end
     
     properties(Hidden)
-        Q                   % buffer que: an array of structures, Q.A, where A holds data of a single element.
-        qix                 % rotating que index.
+        ix                 % rotating que index.
         elix                % index for the next element to be pushed to the Q.
-        push_count          % push counter (unused, 'just in case' variable).
-        
+        count               % push counter (unused, 'just in case' variable).        
     end
     
     methods
         %% {Con,De}structor
-        function bfr = CircBufferT(elsz, numels)
+        function bfr = CircBufferT(numels)
             bfr.numels = numels;
-            bfr.elsz = elsz;
+
             % Init:
             for ii=1:bfr.numels
-                bfr.Q(ii).A = zeros(bfr.elsz);
+                bfr.Q(ii).el = [];
             end
             bfr.qix = 1:bfr.numels;
             bfr.elix = 1;
