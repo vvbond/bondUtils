@@ -1,4 +1,4 @@
-function newObj = greprop(obj, reg, caseOption)
+function props = greprop(obj, reg, caseOption)
 % Search property names of an object for given pattern.
 %
 % Usage: newObj = greprop(obj, pattern)
@@ -23,6 +23,7 @@ function newObj = greprop(obj, reg, caseOption)
         
         props = fieldnames(obj);
         % Search keys:
-        ixs = cellfun(@(c) isempty(c), regexpi(props, reg, caseOption) );
-        newObj = rmfield(obj, props(ixs));
+        ixs = cellfun(@(c) ~isempty(c), regexpi(props, reg, caseOption) );
+        props = props(ixs);
+%         newObj = rmfield(obj, props(ixs));
 end
