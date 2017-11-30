@@ -44,26 +44,20 @@ classdef iColorBar < handle
             icb.htbar = findall(icb.hfig, 'Tag', 'FigureToolBar');
             icbBtn = findall(icb.htbar, 'Tag', 'icolorbar_btn');
             if ~isempty(icbBtn)
-                icb.hbtn = icbBtn;
-                set(icb.hbtn, 'onCallback',  @(src, evt) icb.icbON(src, evt),...
-                              'offCallback', @(src, evt) icb.icbOFF(src,evt),...
-                              'CData', icolorbarIcon.cdata,...
-                              'State', 'off',...
-                              'UserData', []);
-            else
-                icb.hbtn =  uitoggletool(icb.htbar(1),  'CData', icolorbarIcon.cdata, ...
-                                                        'onCallback',  @(src,evt) icb.icbON(src,evt),...
-                                                        'offCallback', @(src,evt) icb.icbOFF(src,evt),...
-                                                        'Separator', 'off',...
-                                                        'tooltipString', 'Insert interactive colorbar',...
-                                                        'Tag', 'icolorbar_btn');
-                % Re-order buttons:
-                hBtns = findall(icb.htbar(1));
-                dumIx = zeros(length(hBtns), 1);
-                for ii=1:length(hBtns), dumIx(ii) = strcmpi(hBtns(ii).Tag, 'Annotation.InsertColorBar'); end
-                cbarIx = find(dumIx);
-                set(icb.htbar, 'children', [hBtns(3:cbarIx-1); hBtns(2); hBtns(cbarIx:end)]);
-            end            
+                delete(icbBtn);
+            end
+            icb.hbtn =  uitoggletool(icb.htbar(1),  'CData', icolorbarIcon.cdata, ...
+                                                    'onCallback',  @(src,evt) icb.icbON(src,evt),...
+                                                    'offCallback', @(src,evt) icb.icbOFF(src,evt),...
+                                                    'Separator', 'off',...
+                                                    'tooltipString', 'Interactive colorbar',...
+                                                    'Tag', 'icolorbar_btn');
+            % Re-order buttons:
+            hBtns = findall(icb.htbar(1));
+            dumIx = zeros(length(hBtns), 1);
+            for ii=1:length(hBtns), dumIx(ii) = strcmpi(hBtns(ii).Tag, 'Annotation.InsertColorBar'); end
+            cbarIx = find(dumIx);
+            set(icb.htbar, 'children', [hBtns(3:cbarIx-1); hBtns(2); hBtns(cbarIx:end)]);
         end
         
         function delete(icb)
@@ -102,11 +96,12 @@ classdef iColorBar < handle
         end
         
         function icbOFF(icb, ~, ~)
-            
             icb.mode = 0;
             
             % Turn off interaction:
+            icb.interactivesOff(icb.hfig);
             if ishandle(icb.hcb), set(icb.hcb,  'ButtonDownFcn', []); end
+            
             
             % Restore figure callbacks:
             if ishandle(icb.hfig)                
