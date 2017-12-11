@@ -1,0 +1,572 @@
+%% Client cached [Session-6, SSL_RSA_WITH_RC4_128_SHA]
+%% Try resuming [Session-6, SSL_RSA_WITH_RC4_128_SHA] from port 53081
+*** ClientHello, TLSv1
+RandomCookie:  GMT: 1366118959 bytes = { 234, 172, 16, 96, 26, 61, 32, 97, 164, 204, 113, 2, 43, 100, 14, 39, 86, 129, 151, 195, 88, 75, 204, 36, 31, 187, 123, 48 }
+Session ID:  {124, 86, 251, 64, 195, 20, 155, 212, 118, 48, 87, 85, 69, 21, 67, 21, 207, 56, 165, 161, 28, 235, 27, 199, 213, 221, 85, 63, 22, 2, 79, 78}
+Cipher Suites: [SSL_RSA_WITH_RC4_128_MD5, SSL_RSA_WITH_RC4_128_SHA, TLS_RSA_WITH_AES_128_CBC_SHA, TLS_DHE_RSA_WITH_AES_128_CBC_SHA, TLS_DHE_DSS_WITH_AES_128_CBC_SHA, SSL_RSA_WITH_3DES_EDE_CBC_SHA, SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA, SSL_DHE_DSS_WITH_3DES_EDE_CBC_SHA, SSL_RSA_WITH_DES_CBC_SHA, SSL_DHE_RSA_WITH_DES_CBC_SHA, SSL_DHE_DSS_WITH_DES_CBC_SHA, SSL_RSA_EXPORT_WITH_RC4_40_MD5, SSL_RSA_EXPORT_WITH_DES40_CBC_SHA, SSL_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA, SSL_DHE_DSS_EXPORT_WITH_DES40_CBC_SHA]
+Compression Methods:  { 0 }
+***
+main, WRITE: TLSv1 Handshake, length = 105
+main, READ: TLSv1 Handshake, length = 74
+*** ServerHello, TLSv1
+RandomCookie:  GMT: 1366118959 bytes = { 23, 156, 119, 68, 32, 58, 167, 115, 17, 198, 67, 224, 220, 55, 50, 135, 94, 64, 166, 83, 116, 205, 222, 137, 116, 4, 0, 152 }
+Session ID:  {167, 34, 233, 150, 249, 242, 1, 80, 94, 241, 211, 159, 200, 93, 105, 117, 102, 36, 182, 191, 181, 110, 92, 195, 95, 113, 132, 115, 62, 188, 69, 171}
+Cipher Suite: SSL_RSA_WITH_RC4_128_SHA
+Compression Method: 0
+***
+%% Created:  [Session-7, SSL_RSA_WITH_RC4_128_SHA]
+** SSL_RSA_WITH_RC4_128_SHA
+main, READ: TLSv1 Handshake, length = 2954
+*** Certificate chain
+chain [0] = [
+[
+  Version: V3
+  Subject: CN=api.twitter.com, OU=Twitter Security, O="Twitter, Inc.", L=San Francisco, ST=California, C=US
+  Signature Algorithm: SHA1withRSA, OID = 1.2.840.113549.1.1.5
+
+  Key:  Sun RSA public key, 2048 bits
+  modulus: 30985837324477786103110734951427513983968068088201008932676884304133323016914500649660154078908789776967988853776064889704280073454319818112895370140925833071522553919505746889341193028837800075748901281886306225829335628417503818395522681780105190926877035252020245955194826301916969741936065089328997991334117099863839817526820083294960946188748743090288229823977604626105772893472679692874146619512985445072789800188671911674309974593028016108712533924630362606516025171511936413033304361183377912793625396615536366411759925988901807506527726440703479503511663031103767502789391578340784107526534506917153576815199
+  public exponent: 65537
+  Validity: [From: Mon Apr 08 01:00:00 BST 2013,
+               To: Tue Dec 31 23:59:59 GMT 2013]
+  Issuer: CN=VeriSign Class 3 Secure Server CA - G2, OU=Terms of use at https://www.verisign.com/rpa (c)09, OU=VeriSign Trust Network, O="VeriSign, Inc.", C=US
+  SerialNumber: [    4e60eb84 54540f0f ecc1ce5a 63faed20]
+
+Certificate Extensions: 8
+[1]: ObjectId: 2.5.29.35 Criticality=false
+AuthorityKeyIdentifier [
+KeyIdentifier [
+0000: A5 EF 0B 11 CE C0 41 03   A3 4A 65 90 48 B2 1C E0  ......A..Je.H...
+0010: 57 2D 7D 47                                        W-.G
+]
+
+]
+
+[2]: ObjectId: 2.5.29.31 Criticality=false
+CRLDistributionPoints [
+  [DistributionPoint:
+     [URIName: http://SVRSecure-G2-crl.verisign.com/SVRSecureG2.crl]
+]]
+
+[3]: ObjectId: 2.5.29.17 Criticality=false
+SubjectAlternativeName [
+  DNSName: api.twitter.com
+]
+
+[4]: ObjectId: 2.5.29.32 Criticality=false
+CertificatePolicies [
+  [CertificatePolicyId: [2.16.840.1.113733.1.7.54]
+[PolicyQualifierInfo: [
+  qualifierID: 1.3.6.1.5.5.7.2.1
+  qualifier: 0000: 16 1C 68 74 74 70 73 3A   2F 2F 77 77 77 2E 76 65  ..https://www.ve
+0010: 72 69 73 69 67 6E 2E 63   6F 6D 2F 63 70 73        risign.com/cps
+
+]]  ]
+]
+
+[5]: ObjectId: 2.5.29.37 Criticality=false
+ExtendedKeyUsages [
+  serverAuth
+  clientAuth
+]
+
+[6]: ObjectId: 2.5.29.15 Criticality=true
+KeyUsage [
+  DigitalSignature
+  Key_Encipherment
+]
+
+[7]: ObjectId: 1.3.6.1.5.5.7.1.1 Criticality=false
+AuthorityInfoAccess [
+  [accessMethod: 1.3.6.1.5.5.7.48.1
+   accessLocation: URIName: http://ocsp.verisign.com, accessMethod: 1.3.6.1.5.5.7.48.2
+   accessLocation: URIName: http://SVRSecure-G2-aia.verisign.com/SVRSecureG2.cer]
+]
+
+[8]: ObjectId: 2.5.29.19 Criticality=false
+BasicConstraints:[
+  CA:false
+  PathLen: undefined
+]
+
+]
+  Algorithm: [SHA1withRSA]
+  Signature:
+0000: D2 AC 02 F6 65 29 93 CF   07 06 1B BA A6 04 9A 9D  ....e)..........
+0010: E4 D8 EF 20 30 5D D8 39   13 BD 38 F6 C9 73 08 C6  ... 0].9..8..s..
+0020: 6A 37 A5 77 B2 6B F1 BB   1E 50 E5 54 C0 63 48 8D  j7.w.k...P.T.cH.
+0030: 5E FB 11 E3 18 BD 34 B3   F9 56 C2 16 E9 D4 35 D7  ^.....4..V....5.
+0040: 1C 33 86 1E D2 53 F9 EF   6C 86 FE 16 F0 F9 F1 38  .3...S..l......8
+0050: 37 20 E2 FF A3 60 16 C0   2D 76 D0 83 A6 80 59 03  7 ...`..-v....Y.
+0060: 22 06 D3 01 A8 EB 98 E5   DB A4 F0 5E F9 57 93 33  "..........^.W.3
+0070: 60 25 37 9F 60 E3 E7 84   48 05 EB 49 94 34 5D EA  `%7.`...H..I.4].
+0080: 78 90 61 70 DC BE 71 B7   8F 9D 48 B3 72 9B 3E 33  x.ap..q...H.r.>3
+0090: F6 AD E2 12 5D 96 F4 0F   A2 E6 8C 6A 8D C6 22 91  ....]......j..".
+00A0: B0 A1 DA 7E AC CE 50 8E   D8 B0 9D E7 EF 1C EB B3  ......P.........
+00B0: 60 7D 3F 44 F7 27 08 33   A0 55 BB 99 C7 16 0F 3B  `.?D.'.3.U.....;
+00C0: 1C 3A 7C DD D1 11 48 6A   BA A5 47 66 E8 51 CC DB  .:....Hj..Gf.Q..
+00D0: AA CD 0E 7A 77 38 7A 98   EC 12 B0 FD C5 DE 2F 89  ...zw8z......./.
+00E0: F5 87 40 C1 6F 8F AB 24   AD 76 65 5C 4F C6 57 2F  ..@.o..$.ve\O.W/
+00F0: C9 0A 02 76 B6 9D BF 86   7A A9 07 A3 14 AF 91 B6  ...v....z.......
+
+]
+chain [1] = [
+[
+  Version: V3
+  Subject: CN=VeriSign Class 3 Secure Server CA - G2, OU=Terms of use at https://www.verisign.com/rpa (c)09, OU=VeriSign Trust Network, O="VeriSign, Inc.", C=US
+  Signature Algorithm: SHA1withRSA, OID = 1.2.840.113549.1.1.5
+
+  Key:  Sun RSA public key, 2048 bits
+  modulus: 26805204942585697129650144595412463242250954291268709266301036024495824973791027819926204981390876127290839630417484149807410261804746759508089765580200356679253083062442260429054606133775019319855909690673182949845768709091396443714887475939342052069620800117254986852728989808912206509895456659303962714198147323815844210204755323690694416931540007728348788504368090654485031400731324687788140860328317017574035903713518686616483759762127757340334587164914231647532002560800506890060600870709333066696688183972273266844851783083813089052543687803822033242547205194080177117946550162762041618232446174602291249555723
+  public exponent: 65537
+  Validity: [From: Wed Mar 25 00:00:00 GMT 2009,
+               To: Sun Mar 24 23:59:59 GMT 2019]
+  Issuer: OU=VeriSign Trust Network, OU="(c) 1998 VeriSign, Inc. - For authorized use only", OU=Class 3 Public Primary Certification Authority - G2, O="VeriSign, Inc.", C=US
+  SerialNumber: [    6e4ffab3 c5e669c4 d167c992 abe858c4]
+
+Certificate Extensions: 9
+[1]: ObjectId: 2.5.29.35 Criticality=false
+AuthorityKeyIdentifier [
+[OU=VeriSign Trust Network, OU="(c) 1998 VeriSign, Inc. - For authorized use only", OU=Class 3 Public Primary Certification Authority - G2, O="VeriSign, Inc.", C=US]
+SerialNumber: [    7dd9fe07 cfa81eb7 107967fb a78934c6]
+]
+
+[2]: ObjectId: 1.3.6.1.5.5.7.1.1 Criticality=false
+AuthorityInfoAccess [
+  [accessMethod: 1.3.6.1.5.5.7.48.1
+   accessLocation: URIName: http://ocsp.verisign.com]
+]
+
+[3]: ObjectId: 2.5.29.17 Criticality=false
+SubjectAlternativeName [
+  CN=Class3CA2048-1-52
+]
+
+[4]: ObjectId: 2.5.29.14 Criticality=false
+SubjectKeyIdentifier [
+KeyIdentifier [
+0000: A5 EF 0B 11 CE C0 41 03   A3 4A 65 90 48 B2 1C E0  ......A..Je.H...
+0010: 57 2D 7D 47                                        W-.G
+]
+]
+
+[5]: ObjectId: 2.5.29.32 Criticality=false
+CertificatePolicies [
+  [CertificatePolicyId: [2.16.840.1.113733.1.7.23.3]
+[PolicyQualifierInfo: [
+  qualifierID: 1.3.6.1.5.5.7.2.1
+  qualifier: 0000: 16 1C 68 74 74 70 73 3A   2F 2F 77 77 77 2E 76 65  ..https://www.ve
+0010: 72 69 73 69 67 6E 2E 63   6F 6D 2F 63 70 73        risign.com/cps
+
+], PolicyQualifierInfo: [
+  qualifierID: 1.3.6.1.5.5.7.2.2
+  qualifier: 0000: 30 1E 1A 1C 68 74 74 70   73 3A 2F 2F 77 77 77 2E  0...https://www.
+0010: 76 65 72 69 73 69 67 6E   2E 63 6F 6D 2F 72 70 61  verisign.com/rpa
+
+]]  ]
+]
+
+[6]: ObjectId: 2.5.29.19 Criticality=true
+BasicConstraints:[
+  CA:true
+  PathLen:0
+]
+
+[7]: ObjectId: 2.5.29.31 Criticality=false
+CRLDistributionPoints [
+  [DistributionPoint:
+     [URIName: http://crl.verisign.com/pca3-g2.crl]
+]]
+
+[8]: ObjectId: 1.3.6.1.5.5.7.1.12 Criticality=false
+Extension unknown: DER encoded OCTET string =
+0000: 04 61 30 5F A1 5D A0 5B   30 59 30 57 30 55 16 09  .a0_.].[0Y0W0U..
+0010: 69 6D 61 67 65 2F 67 69   66 30 21 30 1F 30 07 06  image/gif0!0.0..
+0020: 05 2B 0E 03 02 1A 04 14   8F E5 D3 1A 86 AC 8D 8E  .+..............
+0030: 6B C3 CF 80 6A D4 48 18   2C 7B 19 2E 30 25 16 23  k...j.H.,...0%.#
+0040: 68 74 74 70 3A 2F 2F 6C   6F 67 6F 2E 76 65 72 69  http://logo.veri
+0050: 73 69 67 6E 2E 63 6F 6D   2F 76 73 6C 6F 67 6F 2E  sign.com/vslogo.
+0060: 67 69 66                                           gif
+
+
+[9]: ObjectId: 2.5.29.15 Criticality=true
+KeyUsage [
+  Key_CertSign
+  Crl_Sign
+]
+
+]
+  Algorithm: [SHA1withRSA]
+  Signature:
+0000: 63 74 2F 3D 53 AA 2F 97   EC 26 11 66 1A FE F1 DE  ct/=S./..&.f....
+0010: 41 27 19 D2 7F D8 C1 1C   F9 E2 38 56 3A 1F 90 AE  A'........8V:...
+0020: 39 C5 20 75 AB F8 6C 2D   67 1F 29 C2 21 D7 14 88  9. u..l-g.).!...
+0030: 63 4B B0 9B 27 63 91 F8   F0 A3 01 24 B6 FB 8F E3  cK..'c.....$....
+0040: 3D 02 0B 6F 54 FE D4 CC   DB D6 85 BF 7C 95 1E 5E  =..oT..........^
+0050: 62 11 C1 D9 09 9C 42 B9   B2 D4 AA 2D 98 3A 23 60  b.....B....-.:#`
+0060: CC A2 9A F1 6E E8 CF 8E   D1 1A 3C 5E 19 C5 D7 9B  ....n.....<^....
+0070: 35 B0 02 23 24 E5 05 B8   D5 88 E3 E0 FA B9 F4 5F  5..#$.........._
+
+]
+***
+Found trusted certificate:
+[
+[
+  Version: V1
+  Subject: OU=VeriSign Trust Network, OU="(c) 1998 VeriSign, Inc. - For authorized use only", OU=Class 3 Public Primary Certification Authority - G2, O="VeriSign, Inc.", C=US
+  Signature Algorithm: SHA1withRSA, OID = 1.2.840.113549.1.1.5
+
+  Key:  Sun RSA public key, 1024 bits
+  modulus: 143513759695376256698551988319916512951914872412516427848427412544947128621366524986586133872428627605257011964562738436037014949003023207684123765580577643856902490012206184342797701338702212847300700510904054461415882447323962515420981673690656531522653631627254509600778128478935206940338665570318609767527
+  public exponent: 65537
+  Validity: [From: Mon May 18 01:00:00 BST 1998,
+               To: Wed Aug 02 00:59:59 BST 2028]
+  Issuer: OU=VeriSign Trust Network, OU="(c) 1998 VeriSign, Inc. - For authorized use only", OU=Class 3 Public Primary Certification Authority - G2, O="VeriSign, Inc.", C=US
+  SerialNumber: [    7dd9fe07 cfa81eb7 107967fb a78934c6]
+
+]
+  Algorithm: [SHA1withRSA]
+  Signature:
+0000: 51 4D CD BE 5C CB 98 19   9C 15 B2 01 39 78 2E 4D  QM..\.......9x.M
+0010: 0F 67 70 70 99 C6 10 5A   94 A4 53 4D 54 6D 2B AF  .gpp...Z..SMTm+.
+0020: 0D 5D 40 8B 64 D3 D7 EE   DE 56 61 92 5F A6 C4 1D  .]@.d....Va._...
+0030: 10 61 36 D3 2C 27 3C E8   29 09 B9 11 64 74 CC B5  .a6.,'<.)...dt..
+0040: 73 9F 1C 48 A9 BC 61 01   EE E2 17 A6 0C E3 40 08  s..H..a.......@.
+0050: 3B 0E E7 EB 44 73 2A 9A   F1 69 92 EF 71 14 C3 39  ;...Ds*..i..q..9
+0060: AC 71 A7 91 09 6F E4 71   06 B3 BA 59 57 26 79 00  .q...o.q...YW&y.
+0070: F6 F8 0D A2 33 30 28 D4   AA 58 A0 9D 9D 69 91 FD  ....30(..X...i..
+
+]
+main, READ: TLSv1 Handshake, length = 4
+*** ServerHelloDone
+*** ClientKeyExchange, RSA PreMasterSecret, TLSv1
+main, WRITE: TLSv1 Handshake, length = 262
+SESSION KEYGEN:
+PreMaster Secret:
+0000: 03 01 62 63 0E D0 77 25   EB CD D7 53 A6 55 17 1F  ..bc..w%...S.U..
+0010: 3C 1A 9E 9B F4 39 FC 5C   1F DC 1A 1E 75 AE 78 62  <....9.\....u.xb
+0020: 63 05 39 53 8A 81 39 A2   EB E5 4F BE 07 04 85 40  c.9S..9...O....@
+CONNECTION KEYGEN:
+Client Nonce:
+0000: 51 6D 52 2F EA AC 10 60   1A 3D 20 61 A4 CC 71 02  QmR/...`.= a..q.
+0010: 2B 64 0E 27 56 81 97 C3   58 4B CC 24 1F BB 7B 30  +d.'V...XK.$...0
+Server Nonce:
+0000: 51 6D 52 2F 17 9C 77 44   20 3A A7 73 11 C6 43 E0  QmR/..wD :.s..C.
+0010: DC 37 32 87 5E 40 A6 53   74 CD DE 89 74 04 00 98  .72.^@.St...t...
+Master Secret:
+0000: B1 48 DF 96 CD 0A BA C0   37 4F 7A B2 41 C5 DC C0  .H......7Oz.A...
+0010: 51 B1 7D 75 54 34 40 ED   68 6B B5 1B FF 31 ED E5  Q..uT4@.hk...1..
+0020: 1B B7 C0 72 A5 02 8D 23   5C 56 80 CB B7 C0 42 D8  ...r...#\V....B.
+Client MAC write Secret:
+0000: CF 2B BE 8A 35 0F C4 30   3F E8 86 D7 EA 35 79 B2  .+..5..0?....5y.
+0010: FA EF 9E 37                                        ...7
+Server MAC write Secret:
+0000: EF F3 2F 4B B1 71 18 DC   FA C0 19 28 48 14 D9 CB  ../K.q.....(H...
+0010: CA A4 4E 0C                                        ..N.
+Client write key:
+0000: EB 27 C6 5E 81 58 7F 96   B0 77 FC 75 7C 1E 06 A3  .'.^.X...w.u....
+Server write key:
+0000: 49 73 ED 71 67 E1 4A 1E   64 DF E8 7D B3 D4 5D 0E  Is.qg.J.d.....].
+... no IV used for this cipher
+main, WRITE: TLSv1 Change Cipher Spec, length = 1
+*** Finished
+verify_data:  { 40, 169, 223, 225, 64, 214, 167, 225, 32, 13, 136, 84 }
+***
+main, WRITE: TLSv1 Handshake, length = 36
+main, READ: TLSv1 Change Cipher Spec, length = 1
+main, READ: TLSv1 Handshake, length = 36
+*** Finished
+verify_data:  { 211, 131, 212, 226, 33, 64, 231, 55, 190, 36, 91, 139 }
+***
+%% Cached client session: [Session-7, SSL_RSA_WITH_RC4_128_SHA]
+CN=VeriSign Class 3 Secure Server CA - G2, OU=Terms of use at https://www.verisign.com/rpa (c)09, OU=VeriSign Trust Network, O="VeriSign, Inc.", C=US
+OU=VeriSign Trust Network, OU="(c) 1998 VeriSign, Inc. - For authorized use only", OU=Class 3 Public Primary Certification Authority - G2, O="VeriSign, Inc.", C=US
+Finalizer, called close()
+Finalizer, called closeInternal(true)
+Finalizer, SEND TLSv1 ALERT:  warning, description = close_notify
+Finalizer, Exception sending alert: java.net.SocketException: Socket Closed
+diary off
+%% Client cached [Session-11, SSL_RSA_WITH_RC4_128_SHA]
+%% Try resuming [Session-11, SSL_RSA_WITH_RC4_128_SHA] from port 53493
+*** ClientHello, TLSv1
+RandomCookie:  GMT: 1366120829 bytes = { 66, 133, 192, 62, 89, 183, 160, 194, 167, 188, 55, 138, 150, 140, 255, 162, 141, 154, 198, 70, 227, 131, 97, 123, 158, 127, 9, 71 }
+Session ID:  {27, 11, 246, 172, 190, 110, 215, 129, 52, 96, 12, 15, 242, 164, 130, 41, 188, 193, 91, 130, 170, 122, 3, 181, 80, 113, 182, 96, 187, 131, 215, 213}
+Cipher Suites: [SSL_RSA_WITH_RC4_128_MD5, SSL_RSA_WITH_RC4_128_SHA, TLS_RSA_WITH_AES_128_CBC_SHA, TLS_DHE_RSA_WITH_AES_128_CBC_SHA, TLS_DHE_DSS_WITH_AES_128_CBC_SHA, SSL_RSA_WITH_3DES_EDE_CBC_SHA, SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA, SSL_DHE_DSS_WITH_3DES_EDE_CBC_SHA, SSL_RSA_WITH_DES_CBC_SHA, SSL_DHE_RSA_WITH_DES_CBC_SHA, SSL_DHE_DSS_WITH_DES_CBC_SHA, SSL_RSA_EXPORT_WITH_RC4_40_MD5, SSL_RSA_EXPORT_WITH_DES40_CBC_SHA, SSL_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA, SSL_DHE_DSS_EXPORT_WITH_DES40_CBC_SHA]
+Compression Methods:  { 0 }
+***
+main, WRITE: TLSv1 Handshake, length = 105
+main, READ: TLSv1 Handshake, length = 74
+*** ServerHello, TLSv1
+RandomCookie:  GMT: 1366120828 bytes = { 4, 124, 104, 147, 201, 222, 132, 36, 38, 2, 216, 216, 140, 89, 135, 81, 224, 147, 234, 217, 117, 77, 27, 139, 121, 69, 125, 206 }
+Session ID:  {186, 10, 254, 29, 35, 74, 255, 105, 212, 144, 157, 78, 7, 224, 120, 246, 142, 225, 97, 141, 159, 231, 65, 62, 211, 35, 58, 179, 19, 218, 165, 52}
+Cipher Suite: SSL_RSA_WITH_RC4_128_SHA
+Compression Method: 0
+***
+%% Created:  [Session-12, SSL_RSA_WITH_RC4_128_SHA]
+** SSL_RSA_WITH_RC4_128_SHA
+main, READ: TLSv1 Handshake, length = 2954
+*** Certificate chain
+chain [0] = [
+[
+  Version: V3
+  Subject: CN=api.twitter.com, OU=Twitter Security, O="Twitter, Inc.", L=San Francisco, ST=California, C=US
+  Signature Algorithm: SHA1withRSA, OID = 1.2.840.113549.1.1.5
+
+  Key:  Sun RSA public key, 2048 bits
+  modulus: 30985837324477786103110734951427513983968068088201008932676884304133323016914500649660154078908789776967988853776064889704280073454319818112895370140925833071522553919505746889341193028837800075748901281886306225829335628417503818395522681780105190926877035252020245955194826301916969741936065089328997991334117099863839817526820083294960946188748743090288229823977604626105772893472679692874146619512985445072789800188671911674309974593028016108712533924630362606516025171511936413033304361183377912793625396615536366411759925988901807506527726440703479503511663031103767502789391578340784107526534506917153576815199
+  public exponent: 65537
+  Validity: [From: Mon Apr 08 01:00:00 BST 2013,
+               To: Tue Dec 31 23:59:59 GMT 2013]
+  Issuer: CN=VeriSign Class 3 Secure Server CA - G2, OU=Terms of use at https://www.verisign.com/rpa (c)09, OU=VeriSign Trust Network, O="VeriSign, Inc.", C=US
+  SerialNumber: [    4e60eb84 54540f0f ecc1ce5a 63faed20]
+
+Certificate Extensions: 8
+[1]: ObjectId: 2.5.29.35 Criticality=false
+AuthorityKeyIdentifier [
+KeyIdentifier [
+0000: A5 EF 0B 11 CE C0 41 03   A3 4A 65 90 48 B2 1C E0  ......A..Je.H...
+0010: 57 2D 7D 47                                        W-.G
+]
+
+]
+
+[2]: ObjectId: 2.5.29.31 Criticality=false
+CRLDistributionPoints [
+  [DistributionPoint:
+     [URIName: http://SVRSecure-G2-crl.verisign.com/SVRSecureG2.crl]
+]]
+
+[3]: ObjectId: 2.5.29.17 Criticality=false
+SubjectAlternativeName [
+  DNSName: api.twitter.com
+]
+
+[4]: ObjectId: 2.5.29.32 Criticality=false
+CertificatePolicies [
+  [CertificatePolicyId: [2.16.840.1.113733.1.7.54]
+[PolicyQualifierInfo: [
+  qualifierID: 1.3.6.1.5.5.7.2.1
+  qualifier: 0000: 16 1C 68 74 74 70 73 3A   2F 2F 77 77 77 2E 76 65  ..https://www.ve
+0010: 72 69 73 69 67 6E 2E 63   6F 6D 2F 63 70 73        risign.com/cps
+
+]]  ]
+]
+
+[5]: ObjectId: 2.5.29.37 Criticality=false
+ExtendedKeyUsages [
+  serverAuth
+  clientAuth
+]
+
+[6]: ObjectId: 2.5.29.15 Criticality=true
+KeyUsage [
+  DigitalSignature
+  Key_Encipherment
+]
+
+[7]: ObjectId: 1.3.6.1.5.5.7.1.1 Criticality=false
+AuthorityInfoAccess [
+  [accessMethod: 1.3.6.1.5.5.7.48.1
+   accessLocation: URIName: http://ocsp.verisign.com, accessMethod: 1.3.6.1.5.5.7.48.2
+   accessLocation: URIName: http://SVRSecure-G2-aia.verisign.com/SVRSecureG2.cer]
+]
+
+[8]: ObjectId: 2.5.29.19 Criticality=false
+BasicConstraints:[
+  CA:false
+  PathLen: undefined
+]
+
+]
+  Algorithm: [SHA1withRSA]
+  Signature:
+0000: D2 AC 02 F6 65 29 93 CF   07 06 1B BA A6 04 9A 9D  ....e)..........
+0010: E4 D8 EF 20 30 5D D8 39   13 BD 38 F6 C9 73 08 C6  ... 0].9..8..s..
+0020: 6A 37 A5 77 B2 6B F1 BB   1E 50 E5 54 C0 63 48 8D  j7.w.k...P.T.cH.
+0030: 5E FB 11 E3 18 BD 34 B3   F9 56 C2 16 E9 D4 35 D7  ^.....4..V....5.
+0040: 1C 33 86 1E D2 53 F9 EF   6C 86 FE 16 F0 F9 F1 38  .3...S..l......8
+0050: 37 20 E2 FF A3 60 16 C0   2D 76 D0 83 A6 80 59 03  7 ...`..-v....Y.
+0060: 22 06 D3 01 A8 EB 98 E5   DB A4 F0 5E F9 57 93 33  "..........^.W.3
+0070: 60 25 37 9F 60 E3 E7 84   48 05 EB 49 94 34 5D EA  `%7.`...H..I.4].
+0080: 78 90 61 70 DC BE 71 B7   8F 9D 48 B3 72 9B 3E 33  x.ap..q...H.r.>3
+0090: F6 AD E2 12 5D 96 F4 0F   A2 E6 8C 6A 8D C6 22 91  ....]......j..".
+00A0: B0 A1 DA 7E AC CE 50 8E   D8 B0 9D E7 EF 1C EB B3  ......P.........
+00B0: 60 7D 3F 44 F7 27 08 33   A0 55 BB 99 C7 16 0F 3B  `.?D.'.3.U.....;
+00C0: 1C 3A 7C DD D1 11 48 6A   BA A5 47 66 E8 51 CC DB  .:....Hj..Gf.Q..
+00D0: AA CD 0E 7A 77 38 7A 98   EC 12 B0 FD C5 DE 2F 89  ...zw8z......./.
+00E0: F5 87 40 C1 6F 8F AB 24   AD 76 65 5C 4F C6 57 2F  ..@.o..$.ve\O.W/
+00F0: C9 0A 02 76 B6 9D BF 86   7A A9 07 A3 14 AF 91 B6  ...v....z.......
+
+]
+chain [1] = [
+[
+  Version: V3
+  Subject: CN=VeriSign Class 3 Secure Server CA - G2, OU=Terms of use at https://www.verisign.com/rpa (c)09, OU=VeriSign Trust Network, O="VeriSign, Inc.", C=US
+  Signature Algorithm: SHA1withRSA, OID = 1.2.840.113549.1.1.5
+
+  Key:  Sun RSA public key, 2048 bits
+  modulus: 26805204942585697129650144595412463242250954291268709266301036024495824973791027819926204981390876127290839630417484149807410261804746759508089765580200356679253083062442260429054606133775019319855909690673182949845768709091396443714887475939342052069620800117254986852728989808912206509895456659303962714198147323815844210204755323690694416931540007728348788504368090654485031400731324687788140860328317017574035903713518686616483759762127757340334587164914231647532002560800506890060600870709333066696688183972273266844851783083813089052543687803822033242547205194080177117946550162762041618232446174602291249555723
+  public exponent: 65537
+  Validity: [From: Wed Mar 25 00:00:00 GMT 2009,
+               To: Sun Mar 24 23:59:59 GMT 2019]
+  Issuer: OU=VeriSign Trust Network, OU="(c) 1998 VeriSign, Inc. - For authorized use only", OU=Class 3 Public Primary Certification Authority - G2, O="VeriSign, Inc.", C=US
+  SerialNumber: [    6e4ffab3 c5e669c4 d167c992 abe858c4]
+
+Certificate Extensions: 9
+[1]: ObjectId: 2.5.29.35 Criticality=false
+AuthorityKeyIdentifier [
+[OU=VeriSign Trust Network, OU="(c) 1998 VeriSign, Inc. - For authorized use only", OU=Class 3 Public Primary Certification Authority - G2, O="VeriSign, Inc.", C=US]
+SerialNumber: [    7dd9fe07 cfa81eb7 107967fb a78934c6]
+]
+
+[2]: ObjectId: 1.3.6.1.5.5.7.1.1 Criticality=false
+AuthorityInfoAccess [
+  [accessMethod: 1.3.6.1.5.5.7.48.1
+   accessLocation: URIName: http://ocsp.verisign.com]
+]
+
+[3]: ObjectId: 2.5.29.17 Criticality=false
+SubjectAlternativeName [
+  CN=Class3CA2048-1-52
+]
+
+[4]: ObjectId: 2.5.29.14 Criticality=false
+SubjectKeyIdentifier [
+KeyIdentifier [
+0000: A5 EF 0B 11 CE C0 41 03   A3 4A 65 90 48 B2 1C E0  ......A..Je.H...
+0010: 57 2D 7D 47                                        W-.G
+]
+]
+
+[5]: ObjectId: 2.5.29.32 Criticality=false
+CertificatePolicies [
+  [CertificatePolicyId: [2.16.840.1.113733.1.7.23.3]
+[PolicyQualifierInfo: [
+  qualifierID: 1.3.6.1.5.5.7.2.1
+  qualifier: 0000: 16 1C 68 74 74 70 73 3A   2F 2F 77 77 77 2E 76 65  ..https://www.ve
+0010: 72 69 73 69 67 6E 2E 63   6F 6D 2F 63 70 73        risign.com/cps
+
+], PolicyQualifierInfo: [
+  qualifierID: 1.3.6.1.5.5.7.2.2
+  qualifier: 0000: 30 1E 1A 1C 68 74 74 70   73 3A 2F 2F 77 77 77 2E  0...https://www.
+0010: 76 65 72 69 73 69 67 6E   2E 63 6F 6D 2F 72 70 61  verisign.com/rpa
+
+]]  ]
+]
+
+[6]: ObjectId: 2.5.29.19 Criticality=true
+BasicConstraints:[
+  CA:true
+  PathLen:0
+]
+
+[7]: ObjectId: 2.5.29.31 Criticality=false
+CRLDistributionPoints [
+  [DistributionPoint:
+     [URIName: http://crl.verisign.com/pca3-g2.crl]
+]]
+
+[8]: ObjectId: 1.3.6.1.5.5.7.1.12 Criticality=false
+Extension unknown: DER encoded OCTET string =
+0000: 04 61 30 5F A1 5D A0 5B   30 59 30 57 30 55 16 09  .a0_.].[0Y0W0U..
+0010: 69 6D 61 67 65 2F 67 69   66 30 21 30 1F 30 07 06  image/gif0!0.0..
+0020: 05 2B 0E 03 02 1A 04 14   8F E5 D3 1A 86 AC 8D 8E  .+..............
+0030: 6B C3 CF 80 6A D4 48 18   2C 7B 19 2E 30 25 16 23  k...j.H.,...0%.#
+0040: 68 74 74 70 3A 2F 2F 6C   6F 67 6F 2E 76 65 72 69  http://logo.veri
+0050: 73 69 67 6E 2E 63 6F 6D   2F 76 73 6C 6F 67 6F 2E  sign.com/vslogo.
+0060: 67 69 66                                           gif
+
+
+[9]: ObjectId: 2.5.29.15 Criticality=true
+KeyUsage [
+  Key_CertSign
+  Crl_Sign
+]
+
+]
+  Algorithm: [SHA1withRSA]
+  Signature:
+0000: 63 74 2F 3D 53 AA 2F 97   EC 26 11 66 1A FE F1 DE  ct/=S./..&.f....
+0010: 41 27 19 D2 7F D8 C1 1C   F9 E2 38 56 3A 1F 90 AE  A'........8V:...
+0020: 39 C5 20 75 AB F8 6C 2D   67 1F 29 C2 21 D7 14 88  9. u..l-g.).!...
+0030: 63 4B B0 9B 27 63 91 F8   F0 A3 01 24 B6 FB 8F E3  cK..'c.....$....
+0040: 3D 02 0B 6F 54 FE D4 CC   DB D6 85 BF 7C 95 1E 5E  =..oT..........^
+0050: 62 11 C1 D9 09 9C 42 B9   B2 D4 AA 2D 98 3A 23 60  b.....B....-.:#`
+0060: CC A2 9A F1 6E E8 CF 8E   D1 1A 3C 5E 19 C5 D7 9B  ....n.....<^....
+0070: 35 B0 02 23 24 E5 05 B8   D5 88 E3 E0 FA B9 F4 5F  5..#$.........._
+
+]
+***
+Found trusted certificate:
+[
+[
+  Version: V1
+  Subject: OU=VeriSign Trust Network, OU="(c) 1998 VeriSign, Inc. - For authorized use only", OU=Class 3 Public Primary Certification Authority - G2, O="VeriSign, Inc.", C=US
+  Signature Algorithm: SHA1withRSA, OID = 1.2.840.113549.1.1.5
+
+  Key:  Sun RSA public key, 1024 bits
+  modulus: 143513759695376256698551988319916512951914872412516427848427412544947128621366524986586133872428627605257011964562738436037014949003023207684123765580577643856902490012206184342797701338702212847300700510904054461415882447323962515420981673690656531522653631627254509600778128478935206940338665570318609767527
+  public exponent: 65537
+  Validity: [From: Mon May 18 01:00:00 BST 1998,
+               To: Wed Aug 02 00:59:59 BST 2028]
+  Issuer: OU=VeriSign Trust Network, OU="(c) 1998 VeriSign, Inc. - For authorized use only", OU=Class 3 Public Primary Certification Authority - G2, O="VeriSign, Inc.", C=US
+  SerialNumber: [    7dd9fe07 cfa81eb7 107967fb a78934c6]
+
+]
+  Algorithm: [SHA1withRSA]
+  Signature:
+0000: 51 4D CD BE 5C CB 98 19   9C 15 B2 01 39 78 2E 4D  QM..\.......9x.M
+0010: 0F 67 70 70 99 C6 10 5A   94 A4 53 4D 54 6D 2B AF  .gpp...Z..SMTm+.
+0020: 0D 5D 40 8B 64 D3 D7 EE   DE 56 61 92 5F A6 C4 1D  .]@.d....Va._...
+0030: 10 61 36 D3 2C 27 3C E8   29 09 B9 11 64 74 CC B5  .a6.,'<.)...dt..
+0040: 73 9F 1C 48 A9 BC 61 01   EE E2 17 A6 0C E3 40 08  s..H..a.......@.
+0050: 3B 0E E7 EB 44 73 2A 9A   F1 69 92 EF 71 14 C3 39  ;...Ds*..i..q..9
+0060: AC 71 A7 91 09 6F E4 71   06 B3 BA 59 57 26 79 00  .q...o.q...YW&y.
+0070: F6 F8 0D A2 33 30 28 D4   AA 58 A0 9D 9D 69 91 FD  ....30(..X...i..
+
+]
+main, READ: TLSv1 Handshake, length = 4
+*** ServerHelloDone
+*** ClientKeyExchange, RSA PreMasterSecret, TLSv1
+main, WRITE: TLSv1 Handshake, length = 262
+SESSION KEYGEN:
+PreMaster Secret:
+0000: 03 01 B9 A9 3B 0E 38 F4   23 2D FF 1D 74 24 BC 0B  ....;.8.#-..t$..
+0010: 2B 5C 06 01 7D 44 69 3A   E4 AC 18 B3 C4 B8 61 22  +\...Di:......a"
+0020: 2D 70 E2 D9 96 8D CD E0   DD 59 29 79 71 C2 B6 D4  -p.......Y)yq...
+CONNECTION KEYGEN:
+Client Nonce:
+0000: 51 6D 59 7D 42 85 C0 3E   59 B7 A0 C2 A7 BC 37 8A  QmY.B..>Y.....7.
+0010: 96 8C FF A2 8D 9A C6 46   E3 83 61 7B 9E 7F 09 47  .......F..a....G
+Server Nonce:
+0000: 51 6D 59 7C 04 7C 68 93   C9 DE 84 24 26 02 D8 D8  QmY...h....$&...
+0010: 8C 59 87 51 E0 93 EA D9   75 4D 1B 8B 79 45 7D CE  .Y.Q....uM..yE..
+Master Secret:
+0000: 60 81 A0 CF 5F A8 01 AA   AA 83 91 A7 6C B6 97 9B  `..._.......l...
+0010: 7E C6 44 68 57 9F 28 78   36 BA 41 1D 51 CB 8B 69  ..DhW.(x6.A.Q..i
+0020: E0 F9 4F F8 F7 AD 62 BE   AB 1D 47 12 5F 2B 34 E5  ..O...b...G._+4.
+Client MAC write Secret:
+0000: 1A 8F EB 7D 46 BC 1F F4   B5 D4 C8 F0 B3 D4 54 77  ....F.........Tw
+0010: F8 95 70 30                                        ..p0
+Server MAC write Secret:
+0000: 36 3A C7 15 7C 81 EF 5F   FE 95 32 D5 FA 49 E4 AE  6:....._..2..I..
+0010: D1 1E 3B 6A                                        ..;j
+Client write key:
+0000: 06 01 E5 E1 54 92 15 5E   EF AB 61 75 D0 FA 81 74  ....T..^..au...t
+Server write key:
+0000: FF F6 B0 28 68 3A 50 30   AF B5 25 D8 91 B7 70 17  ...(h:P0..%...p.
+... no IV used for this cipher
+main, WRITE: TLSv1 Change Cipher Spec, length = 1
+*** Finished
+verify_data:  { 195, 85, 174, 199, 179, 53, 50, 182, 108, 37, 108, 106 }
+***
+main, WRITE: TLSv1 Handshake, length = 36
+main, READ: TLSv1 Change Cipher Spec, length = 1
+main, READ: TLSv1 Handshake, length = 36
+*** Finished
+verify_data:  { 139, 201, 100, 38, 141, 39, 12, 174, 8, 126, 225, 140 }
+***
+%% Cached client session: [Session-12, SSL_RSA_WITH_RC4_128_SHA]
+CN=VeriSign Class 3 Secure Server CA - G2, OU=Terms of use at https://www.verisign.com/rpa (c)09, OU=VeriSign Trust Network, O="VeriSign, Inc.", C=US
+OU=VeriSign Trust Network, OU="(c) 1998 VeriSign, Inc. - For authorized use only", OU=Class 3 Public Primary Certification Authority - G2, O="VeriSign, Inc.", C=US
+diary off
