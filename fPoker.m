@@ -39,8 +39,6 @@ classdef fPoker < handle
         hYMonitorTitle
         xMonitorOnOff = 0;  % X/Y monitor switches.
         yMonitorOnOff = 0;
-        xMonitorRunning = 0;
-        yMonitorRunning = 0;
     end
         
     % Auxiliary properties:
@@ -56,6 +54,10 @@ classdef fPoker < handle
         oldWindowButtunUpFcn
         oldWindowScrollWheelFcn
         oldAxesButtonDownFcn
+        xMonitorRunning = 0;
+        yMonitorRunning = 0;
+        cm          % context menu.
+        old_cm
     end
     
     properties(Access = private)
@@ -188,7 +190,15 @@ classdef fPoker < handle
                 fp.hYfig = randi(1e6);
                 fp.hXplot = -1;
                 fp.hYplot = -1;
+                
+                % Configure context menu:
+                fp.old_cm = fp.hax.UIContextMenu;
+                fp.cm = uicontextmenu;
+                fp.hax.UIContextMenu = fp.cm;
+                uimenu(fp.cm, 'Label', 'X-cross-section', 'Checked', fp.xMonitorOnOff, 'Callback', @(src,evt)fp.monitor('x'));
+                uimenu(fp.cm, 'Label', 'Y-cross-section', 'Checked', fp.yMonitorOnOff, 'Callback', @(src,evt)fp.monitor('y'));
             end
+            
             
             % Update the state:
             fp.OnOff = 1;
@@ -203,6 +213,8 @@ classdef fPoker < handle
             set(fp.hfig, 'WindowButtonUpFcn',     fp.oldWindowButtunUpFcn);
             set(fp.hax,  'ButtonDownFcn',         fp.oldAxesButtonDownFcn);
             set(fp.hfig, 'WindowScrollWheelFcn',  fp.oldWindowScrollWheelFcn);
+            
+            fp.hax.UIContextMenu = fp.old_cm;
             
             % Delete the info text:
             set(fp.infotext, 'String', '');
@@ -225,7 +237,7 @@ classdef fPoker < handle
                     
                     % Report the status:
                     if fp.xMonitorOnOff
-                        disp('X-Monitor enabled: click to activate/deactivate.');
+                        disp('X-Monitor enabled: click to activate/deactivate.');                       
                     else
                         disp('X-Monitor disabled.');
                     end
@@ -240,6 +252,8 @@ classdef fPoker < handle
                         disp('Y-Monitor disabled.');
                     end
             end
+            fp.cm.Children(2).Checked = fp.xMonitorOnOff;
+            fp.cm.Children(1).Checked = fp.yMonitorOnOff;
         end
         
         %% X/Y line plots
@@ -426,21 +440,23 @@ classdef fPoker < handle
         end
         
         %% Axis button down (click) callback
-        function axbdcb(fp, ~, ~)
+        function axbdcb(fp, ~, evt)
             
-            fp.panOn  = 1;
-            oldFigUnits = get(gcf, 'Units');
-            set(gcf, 'units', 'pixels');
-            fp.panFigPoint = get(gcf, 'currentPoint');  % Get current point w.r.t. the current figure.
-            set(gcf, 'units', oldFigUnits);
-            fp.panOldAxis  = axis;  % Store the initial axis info.
-            
-            % Find axes dimensions in pixels:
-            haxes = gca;
-            set(haxes, 'units', 'pixels');
-            axpos = get(haxes, 'position');
-            set(haxes, 'units', 'normalized');
-            fp.panScaling = [ diff(xlim)/axpos(3) diff(ylim)/axpos(4) ];     
+            if evt.Button == 1 % left click.                
+                fp.panOn  = 1;
+                oldFigUnits = get(gcf, 'Units');
+                set(gcf, 'units', 'pixels');
+                fp.panFigPoint = get(gcf, 'currentPoint');  % Get current point w.r.t. the current figure.
+                set(gcf, 'units', oldFigUnits);
+                fp.panOldAxis  = axis;  % Store the initial axis info.
+
+                % Find axes dimensions in pixels:
+                haxes = gca;
+                set(haxes, 'units', 'pixels');
+                axpos = get(haxes, 'position');
+                set(haxes, 'units', 'normalized');
+                fp.panScaling = [ diff(xlim)/axpos(3) diff(ylim)/axpos(4) ];     
+            end
         end
         
     end
