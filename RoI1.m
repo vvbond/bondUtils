@@ -39,7 +39,8 @@ classdef RoI1 < handle
             r1.hfig  = gcf;
             r1.hax   = gca;
             r1.htbar = findall(gcf,'Type','uitoolbar');
-            roi1Icon = load('roi1Icon.mat');
+            roi1Icon_fname = 'roi1Icon.mat';
+            roi1Icon = load(fullfile(fileparts(mfilename('fullpath')), 'icons', roi1Icon_fname));
             r1.hbtn = uitoggletool(r1.htbar,  'CData', roi1Icon.cdata, ...
                                               'OnCallback',  @(src,evt) roiOn(r1,src,evt),...
                                               'OffCallback', @(src,evt) roiOff(r1,src,evt),...
