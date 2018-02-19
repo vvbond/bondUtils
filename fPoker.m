@@ -195,8 +195,9 @@ classdef fPoker < handle
                 fp.old_cm = fp.hax.UIContextMenu;
                 fp.cm = uicontextmenu;
                 fp.hax.UIContextMenu = fp.cm;
-                uimenu(fp.cm, 'Label', 'X-cross-section', 'Checked', fp.xMonitorOnOff, 'Callback', @(src,evt)fp.monitor('x'));
-                uimenu(fp.cm, 'Label', 'Y-cross-section', 'Checked', fp.yMonitorOnOff, 'Callback', @(src,evt)fp.monitor('y'));
+                offon = {'off', 'on'};
+                uimenu(fp.cm, 'Label', 'X-cross-section', 'Checked', offon{fp.xMonitorOnOff+1}, 'Callback', @(src,evt)fp.monitor('x'));
+                uimenu(fp.cm, 'Label', 'Y-cross-section', 'Checked', offon{fp.yMonitorOnOff+1}, 'Callback', @(src,evt)fp.monitor('y'));
             end
             
             
@@ -252,8 +253,9 @@ classdef fPoker < handle
                         disp('Y-Monitor disabled.');
                     end
             end
-            fp.cm.Children(2).Checked = fp.xMonitorOnOff;
-            fp.cm.Children(1).Checked = fp.yMonitorOnOff;
+            offon = {'off', 'on'};
+            fp.cm.Children(2).Checked = offon{fp.xMonitorOnOff+1};
+            fp.cm.Children(1).Checked = offon{fp.yMonitorOnOff+1};
         end
         
         %% X/Y line plots
