@@ -22,6 +22,10 @@ classdef FunPrint < handle
     
     %% Some fun
     methods
+        function init(fpr)
+            fpr.backspace = '';
+        end
+        
         function over(fpr, msg, varargin)
             msgStr = sprintf(msg, varargin{:});
             fprintf([fpr.backspace, msgStr]);
