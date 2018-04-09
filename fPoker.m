@@ -100,6 +100,11 @@ classdef fPoker < handle
                                     'TooltipString', 'Figure "Poker" tool', ...
                                     'Tag', 'pkrBtn',... 
                                     'Separator', 'on');
+                % Properties button:
+                propsIcon = load(fullfile(fileparts(mfilename('fullpath')),'/icons/propsIcon.mat'));
+                uipushtool(ht(1), 'CData', propsIcon.cdata, 'TooltipString', 'fPoker properties',...
+                           'ClickedCallback', @(src,evt) fp.props_cb(src,evt));
+
             end
             
            % If axes has an image, grab its handle:
@@ -265,7 +270,13 @@ classdef fPoker < handle
                 yLabel = get(fp.hax, 'YLabel');
                 
                 figure(fp.hXfig); clf;
-                set(fp.hXfig, 'NumberTitle', 'off', 'Name', 'X-Monitor');
+                T = [ 1 0 0 0
+                      0 1 0 0
+                      0 0 1 0
+                      0 1 0 .5 ];
+                fpos = fp.hfig.Position*T; % shift (translate).
+
+                set(fp.hXfig, 'NumberTitle', 'off', 'Name', 'X-Monitor', 'Position', fpos);
                 fp.hXplot = plot(fp.xplot(:,1), fp.xplot(:,2)); 
                 
                 % Vertical line indicating the cursor position:
@@ -277,10 +288,8 @@ classdef fPoker < handle
                 box on; grid on;
                 pan xon; zoom xon
                 
-                if exist('Rulerz', 'file') == 2
-                    Rulerz('x');
-                end
-
+                if exist('Rulerz', 'file'), Rulerz('x'); end
+                if exist('FigureToWorkspace', 'file'), FigureToWorkspace; end
                 
                 % Return focus to the main figure:
                 figure(fp.hfig);
@@ -313,9 +322,8 @@ classdef fPoker < handle
                 xlabel(yLabel.String);
                 box on; grid on;
                 
-                if exist('Rulerz', 'file')
-                    Rulerz('x');
-                end
+                if exist('Rulerz', 'file'), Rulerz('x'); end
+                if exist('FigureToWorkspace', 'file'), FigureToWorkspace; end
                 
                 % Return focus to the main figure:
                 figure(fp.hfig);
@@ -461,5 +469,19 @@ classdef fPoker < handle
             end
         end
         
+        %% Properties button callback
+        function props_cb(fp, ~, ~)
+            prompt = {'Button motion function:'};
+            if isempty(fp.bmfun)
+                defInput = {'@(fp)fp_spectrogram(fp, @hamming, nfft, noverlap, [fs])'};
+            else
+                defInput = { func2str(fp.bmfun{1}) };
+            end
+            answer = inputdlg(prompt, 'fPoker properties', [1 80], defInput);
+            if isempty(answer), return; end
+            
+            fcn = str2func(answer{1});
+            fp.bmfun{1} = fcn;
+        end
     end
 end
