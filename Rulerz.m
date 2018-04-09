@@ -1,16 +1,19 @@
 classdef Rulerz < handle
 %% Interactive tool for measuring distances along x- and/or y-axes.
-    properties
+    properties(SetObservable)
         xx      % 2-vector of x-coordinates for the two vertical lines.
         yy      % 2-vector of y-coordinates for the two horizontal lines. 
+    end
+    properties
         axis    % 1 or 'x' for x-lines only;
-        % 2 or 'y' for y-lines only.
-        % otherwise - both x- and y-lines are displayed.
+                % 2 or 'y' for y-lines only;
+                % otherwise - both x- and y-lines are displayed.
         lColor  % lines color.
         lStyle  % lines style.
         lWidth  % lines width.
         annotationPosition  % position of the annotation box.
         annotationBgColor   % background color of the annotation box.
+        bmfun = {};
     end
     
     properties(Hidden = true)
@@ -92,8 +95,12 @@ classdef Rulerz < handle
 
             dx = diff(xlims);
             dy = diff(ylims);
-            rlz.xx = xlims(1)+[1 2]./3*dx;
-            rlz.yy = ylims(1)+[1 2]./3*dy; % lines position [x1 x2 y1 y2].
+            if isempty(rlz.xx)
+                rlz.xx = xlims(1)+[1 2]./3*dx;
+            end
+            if isempty(rlz.yy)
+                rlz.yy = ylims(1)+[1 2]./3*dy; % lines position [x1 x2 y1 y2].
+            end
             
             % Plot lines:
             hold on;
@@ -163,6 +170,11 @@ classdef Rulerz < handle
                 end
                 % Update info box:
                 set(rlz.hInfoBox, 'String', rlz.infoString() );
+                
+                % Execute external mouse movement functions:
+                for ii=1:length(rlz.bmfun)
+                    rlz.bmfun{ii}(rlz);
+                end
             end
         end
 
