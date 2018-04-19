@@ -1,4 +1,4 @@
-function cdata = alpha2cdata(alpha)
+function cdataOut = alpha2cdata(alpha, cdataIn)
 % Compute color given transparency values.
 %
 % Usage: cdata = alpha2cdata(alpha)
@@ -23,11 +23,18 @@ if isa(alpha, 'uint8')
 end
 
 [m,n] = size(alpha);
-cdata = zeros(m,n,3);
+
+if nargin == 1
+    cdataIn = zeros(m,n,3);
+elseif isa(cdataIn, 'uint8')
+    cdataIn = double(cdataIn)/255;
+end
+
+cdataOut = zeros(m,n,3);
+bg = ones(m,n,3);
 
 ix = find(alpha == 0);
 for k=1:3
-    cdata(:,:,k) = 1 - alpha;
-    cdata(ix+(k-1)*m*n) = nan;
+    cdataOut(:,:,k) = alpha.*cdataIn(:,:,k) + (1 - alpha).*bg(:,:,k);
+    cdataOut(ix+(k-1)*m*n) = nan;
 end
-
