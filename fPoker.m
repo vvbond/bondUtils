@@ -274,9 +274,9 @@ classdef fPoker < handle
                       0 1 0 0
                       0 0 1 0
                       0 1 0 .5 ];
-                fpos = fp.hfig.Position*T; % shift (translate).
+                fpos = fp.hfig.OuterPosition*T; % shift (translate).
 
-                set(fp.hXfig, 'NumberTitle', 'off', 'Name', 'X-Monitor', 'Position', fpos);
+                set(fp.hXfig, 'NumberTitle', 'off', 'Name', 'X-Monitor', 'OuterPosition', fpos);
                 fp.hXplot = plot(fp.xplot(:,1), fp.xplot(:,2)); 
                 
                 % Vertical line indicating the cursor position:
@@ -311,9 +311,9 @@ classdef fPoker < handle
                       0 1 0 0
                       0 0 1 0
                       0 1 0 .5 ];
-                fpos = fp.hfig.Position*T; % shift (translate).
+                fpos = fp.hfig.OuterPosition*T; % shift (translate).
                 
-                set(fp.hYfig, 'NumberTitle', 'off', 'Name', 'Y-Monitor', 'Position', fpos);
+                set(fp.hYfig, 'NumberTitle', 'off', 'Name', 'Y-Monitor', 'OuterPosition', fpos);
                 fp.hYplot = plot(fp.yplot(:,1), fp.yplot(:,2)); 
 %                 hold on;
 %                 fp.hYplot_X = plot([1 1]*fp.p(2), ylim, '--');
