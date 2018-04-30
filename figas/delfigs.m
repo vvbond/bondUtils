@@ -5,7 +5,7 @@ function delfigs(varargin)
 %        delFigs(figHandles)
 % _______________________________________________________________________ %
 
-error(nargchk(0,1,nargin));
+narginchk(0,1);
 if nargin > 0
    figs = varargin{1}; 
 else

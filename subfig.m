@@ -1,5 +1,5 @@
 function subfig(fh, m, n, p)
-% Position the given figure in the grid layout.
+% Position the given figure in a specified grid layout.
 %
 % Usage: subfig(fh, layout)
 %
@@ -29,22 +29,23 @@ function subfig(fh, m, n, p)
     posIx = p;
     
     % Main:
+    scrBottomMargin = 34;
+    scrTopMargin = 27;
     scrSz = get(0, 'ScreenSize');
     scrW = scrSz(3);
-    scrH = scrSz(4);
+    scrH = scrSz(4) - scrBottomMargin - scrTopMargin;
     
     % Create grid:
     cellW = scrW/nCols;
     cellH = scrH/nRows;
     
     x = 1 + (0:nCols-1)*cellW;
-    y = 1 + (0:nRows-1)*cellH;
+    y = 1 + scrBottomMargin + (0:nRows-1)*cellH;
     
     [X, Y] = meshgrid(x,fliplr(y));
     
     lowerL = [min(X(posIx)), min(Y(posIx))];
     upperR = [max(X(posIx)+cellW), max(Y(posIx)+cellH)];
     figPos = [lowerL, upperR-lowerL];
-    set(fh, 'OuterPosition', figPos);
-    
+    set(fh, 'OuterPosition', figPos);    
 end

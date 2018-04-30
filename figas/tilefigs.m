@@ -6,9 +6,9 @@ function tilefigs(varargin)
 %        tileFigs(nrows, figHandles)
 % ________________________________________________________________________
 
-error(nargchk(0,2,nargin));
+narginchk(0,2);
 
-ncols = 2;      % Number of columns is fixed
+ncols = 2;      % Number of columns is fixed.
 % Set the number of rows
 if nargin == 2
    figHandles = varargin{2};
@@ -25,17 +25,17 @@ else
     end
 end
 
-tuneH = 1+nrows/25;
-tuneW = 5;
+tuneH = 1;
+tuneW = 0;
 
 scrsz = get(0,'ScreenSize');
-width = scrsz(3)/(2*ncols)-tuneW;
+width = scrsz(3)/(ncols)-tuneW;
 height = scrsz(4)/(nrows*tuneH);
 bottom = scrsz(4) - (1:nrows)'*height*tuneH;
-left = scrsz(3)/2+tuneW + ((1:ncols)'-1)*(width+tuneW);
+left = 1 + (0:ncols-1)*(width+tuneW);
 
 b = repmat(bottom, ncols, 1);
-l = repmat(left', nrows, 1);
+l = repmat(left, nrows, 1);
 
 for ii=1:N
     k = mod(ii-1, nrows*ncols)+1;

@@ -1,4 +1,4 @@
-classdef Rulerz < handle
+classdef Rulerz < iTool
 %% Interactive tool for measuring distances along x- and/or y-axes.
     properties(SetObservable)
         xx      % 2-vector of x-coordinates for the two vertical lines.
@@ -17,6 +17,7 @@ classdef Rulerz < handle
     end
     
     properties(Hidden = true)
+        hfig
         lineIx      % index of the "clikcked" (selected) line.
         hBtn        % handle of the toggle button.
         hLines      % handles of the ruler lines.
@@ -40,7 +41,8 @@ classdef Rulerz < handle
             
             rlz.axis = raxis;
             % Add a toolbar toggle button:
-            ht = findall(gcf,'Type','uitoolbar');
+            rlz.hfig = gcf;
+            ht = findall(rlz.hfig,'Type','uitoolbar');
             switch raxis
                 case {1, 'x'}
                     rlzIcon = load(fullfile(fileparts(mfilename('fullpath')),'/icons/RulerzX.mat'));
@@ -60,7 +62,7 @@ classdef Rulerz < handle
             rlz.lStyle = '--';
             rlz.lWidth = 2;
             rlz.annotationBgColor = [.95 .95 .95];
-            rlz.annotationPosition = [0 .9 .1 .1];
+            rlz.annotationPosition = [0 .1 .1 .1];
 
             % Add listener:
             addlistener(rlz, 'axisChange', @(src, evt) axisChangeEvt(rlz,src,evt));
@@ -118,13 +120,16 @@ classdef Rulerz < handle
             
             % Annotation box:
             rlz.hInfoBox = annotation('textbox', rlz.annotationPosition, ...
+                                      'Units', 'normalized',...
                                       'FontName', 'Courier',...
                                       'string', rlz.infoString(),... 
-                                      'Color', 'k', 'BackgroundColor', rlz.annotationBgColor, 'EdgeColor', 'k', ...
+                                      'Color', 'k',... 
+                                      'BackgroundColor', rlz.annotationBgColor,...
+                                      'EdgeColor', 'k', ...
                                       'Tag', 'rulersInfo');            
             
             % Set lines interaction callback:
-            zoom off, pan off, datacursormode off
+            rlz.interactivesOff(rlz.hfig);
             set(rlz.hLines, 'ButtonDownFcn', @(src,evt) lbdcb(rlz, src, evt));
         end
         

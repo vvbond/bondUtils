@@ -1,4 +1,4 @@
-classdef fPoker < handle
+classdef fPoker < iTool
 % Interactive tool to poke around in a figure.
 % 
 % The tool facilitates live pointer display, scroll-wheel zooming and drag-like axes panning.
@@ -164,7 +164,7 @@ classdef fPoker < handle
         % Enable the Poker tool.
         
             % Turn off other interactive tools:
-            pan off, zoom off, plotedit off, datacursormode off
+            fp.interactivesOff(fp.hfig);
             
             fp.hax = gca;
             
@@ -275,15 +275,16 @@ classdef fPoker < handle
                       0 0 1 0
                       0 1 0 .5 ];
                 fpos = fp.hfig.OuterPosition*T; % shift (translate).
-
-                set(fp.hXfig, 'NumberTitle', 'off', 'Name', 'X-Monitor', 'OuterPosition', fpos);
+                
+                figName = sprintf('%s: %s', 'X', fp.hfig.Name);
+                set(fp.hXfig, 'NumberTitle', 'off', 'Name', figName, 'OuterPosition', fpos);
                 fp.hXplot = plot(fp.xplot(:,1), fp.xplot(:,2)); 
                 
                 % Vertical line indicating the cursor position:
 %                 hold on;
 %                 fp.hXplot_Y = plot([1 1]*fp.p(2), ylim, '--');
 %                 hold off;
-                fp.hXMonitorTitle = title(sprintf('x = %1.2f;  ix = %1d', fp.p(1), fp.pix(1)));
+                fp.hXMonitorTitle = title(sprintf('%s: x = %1.2f;  ix = %1d', fp.hfig.Name, fp.p(1), fp.pix(1)));
                 xlabel(yLabel.String);
                 box on; grid on;
                 pan xon; zoom xon
@@ -313,12 +314,13 @@ classdef fPoker < handle
                       0 1 0 .5 ];
                 fpos = fp.hfig.OuterPosition*T; % shift (translate).
                 
-                set(fp.hYfig, 'NumberTitle', 'off', 'Name', 'Y-Monitor', 'OuterPosition', fpos);
+                figName = sprintf('%s: %s', 'Y', fp.hfig.Name);
+                set(fp.hYfig, 'NumberTitle', 'off', 'Name', figName, 'OuterPosition', fpos);
                 fp.hYplot = plot(fp.yplot(:,1), fp.yplot(:,2)); 
 %                 hold on;
 %                 fp.hYplot_X = plot([1 1]*fp.p(2), ylim, '--');
 %                 hold off;
-                fp.hYMonitorTitle = title(sprintf('y = %1.2f;  ix = %1d', fp.p(2), fp.pix(2)));
+                fp.hYMonitorTitle = title(sprintf('%s: y = %1.2f;  ix = %1d', fp.hfig.Name, fp.p(2), fp.pix(2)));
                 xlabel(yLabel.String);
                 box on; grid on;
                 
@@ -331,7 +333,7 @@ classdef fPoker < handle
                 fp.yplot = [fp.himg.XData(:), fp.himg.CData(fp.pix(2), :)'];
                 set(fp.hYplot, 'xdata', fp.yplot(:,1), 'ydata', fp.yplot(:,2));
 %                 set(fp.hYplot_X, 'xdata', [1 1]*fp.p(2), 'ydata', arange(fp.himg.CData(:,fp.pix(1))));
-                set(fp.hYMonitorTitle, 'String', sprintf('y = %1.2f;  ix = %1d', fp.p(2), fp.pix(2)));
+                set(fp.hYMonitorTitle, 'String', sprintf('%s: y = %1.2f;  ix = %1d', fp.hfig.Name, fp.p(2), fp.pix(2)));
             end
         end
     end

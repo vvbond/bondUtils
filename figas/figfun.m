@@ -35,6 +35,6 @@ end
 
 for ii=1:length(fighs)
     figure(fighs(ii));
-    fun();
+    fun(fighs(ii));
 end
 clear figs

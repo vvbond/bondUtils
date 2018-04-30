@@ -1,8 +1,8 @@
 function ruler()
 % Ruler tape.
 %
-% ruler  -  first time: creates a menu function for measurement in the current figure
-%           second time: deletes the menu function in the current figure
+% ruler  -  first time: creates a menu function for measurement in the current figure,
+%           second time: deletes the menu function in the current figure.
 %
 % Measurement starts/ends when pressing/releasing the mouse button.
 % A dialog box shows the measurement results.
