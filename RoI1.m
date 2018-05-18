@@ -2,6 +2,7 @@ classdef RoI1 < handle
     % Interactive tool for specifying a 1D region of interest (ROI).
     %   Detailed explanation goes here
     
+    %% Properties
     properties
         rng                 % 2-vector specifying the [from to] range of the ROI.
         lineStyle           % string, specifies the color and style of the vertical lines.
@@ -85,8 +86,8 @@ classdef RoI1 < handle
             r1.old_NextPlot = get(gca,'NextPlot');
             hold on;
             
-            % Turn off other interactive tools:
-            zoom off, pan off, datacursormode off
+            % Disable other interactive tools:
+            r1.interactivesOff(r1.hfig);
 
             % Plot ROI lines:
             ylims = get(r1.hax, 'ylim');
@@ -115,6 +116,12 @@ classdef RoI1 < handle
                       
             % Update the roi state:
             r1.on = 1;
+            
+            % Call user-defined function:
+            if ~isempty(r1.userFcn)
+                evt = 'roi1_created';
+                r1.userFcn(r1, evt);
+            end
         end
         
         %% ROI off callback
@@ -126,6 +133,12 @@ classdef RoI1 < handle
             % Delete ROI lines:
             if ishandle(r1.hline),   delete(r1.hline);   end
             if ishandle(r1.hinfobx), delete(r1.hinfobx); end
+            
+            % Call user-defined function:
+            if ~isempty(r1.userFcn)
+                evt = 'roi1_deleted';
+                r1.userFcn(r1, evt);
+            end
         end
         
         %% Interactions: button down callback
@@ -136,17 +149,20 @@ classdef RoI1 < handle
             r1.old_bmcb = get(r1.hfig, 'WindowButtonMotionFcn');
             r1.old_bucb = get(r1.hfig, 'WindowButtonUpFcn');
             
+            pointer = {'left', 'right'};
             set(r1.hfig, 'windowButtonMotionFcn', @(src,evt) roi1_wbmcb(r1,src,evt, 0),...
-                         'windowButtonUpFcn',     @(src,evt) roi1_wbucb(r1,src,evt) );
+                         'windowButtonUpFcn',     @(src,evt) roi1_wbucb(r1,src,evt),...
+                         'pointer', pointer{r1.lineIx});
         end
         
-        function roi1_axis_bdcb(r1,src,evt)
+        function roi1_axis_bdcb(r1,~,~)
             cpos = get(gca, 'currentPoint');
             if inarange(cpos(1,1), r1.rng)
                 r1.lineIx = 1;
                 dx = r1.rng(1) - cpos(1,1);
                 set(r1.hfig, 'windowButtonMotionFcn', @(src,evt) roi1_wbmcb(r1,src,evt, dx),...
-                              'windowButtonUpFcn',    @(src,evt) roi1_wbucb(r1,src,evt) );
+                              'windowButtonUpFcn',    @(src,evt) roi1_wbucb(r1,src,evt),...
+                              'pointer', 'fleur');
             end
         end
         
@@ -166,8 +182,8 @@ classdef RoI1 < handle
                 
                 % Call user-defined function:
                 if ~isempty(r1.userFcn)
-                    r1.userFcn(r1);
-                    figure(r1.hfig);
+                    evt = 'roi1_resize';
+                    r1.userFcn(r1, evt);
                 end
             end
         end
@@ -175,8 +191,15 @@ classdef RoI1 < handle
         %% Interactions: window button up callback
         function roi1_wbucb(r1,~,~)
             r1.lineIx = 0;
-            set(r1.hfig, 'windowButtonMotionFcn', r1.old_bmcb);
-            set(r1.hfig, 'windowButtonUpFcn', r1.old_bucb);
+            set(r1.hfig, 'windowButtonMotionFcn', r1.old_bmcb,...
+                         'windowButtonUpFcn', r1.old_bucb,...
+                         'Pointer', 'arrow');
+            
+            % Call user-defined function:
+            if ~isempty(r1.userFcn)
+                evt = 'roi1_resized';
+                r1.userFcn(r1, evt);
+            end
         end        
         
         %% ROI update:
@@ -200,6 +223,28 @@ classdef RoI1 < handle
 %             s = ['ROI: [' num2str(r1.rng', '%5.2f ') ']' ];
             s = r1.displayFcn(r1.rng);
         end
-    end 
+    end
+    
+    %% Static
+    methods(Static)
+        function interactivesOff(hfig)
+        % Switch off interactive tools.
+            curfig = gcf;
+            figure(hfig)
+            plotedit off, zoom off, pan off, rotate3d off, datacursormode off, brush off
+            figure(curfig)
+        end
+        
+        function escape(hfig)
+        % Emergency: clear all interaction callbacks.
+            if ishandle(hfig)                
+                set(hfig, 'WindowButtonMotionFcn', [], ...
+                          'WindowButtonUpFcn',     [], ... 
+                          'WindowButtonDownFcn',   [], ...
+                          'KeyPressFcn',           [], ...
+                          'KeyReleaseFcn',         [] );
+            end            
+        end
+    end
 end
 

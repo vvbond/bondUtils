@@ -67,6 +67,7 @@ classdef RoI2 < handle
 
     %% (c) Vladimir Bondarenko, http://www.mathworks.co.uk/matlabcentral/fileexchange/authors/52876
     
+    %% Properties
     properties
         p           % Depends on the shape: 
                     %  in rectangular ROI shape (shape = 0), p is a  2x2 matrix of [p_tl p_br] points;
@@ -409,7 +410,7 @@ classdef RoI2 < handle
                           'windowButtonUpFcn',     xyr.old_bucb );
             % Call the user-defined function:
             if ~isempty(xyr.userFcn)
-                evt = 'roi2_resized';
+                evt = 'roi2_resized';   % don't confuse with the event 'roi2_resize'.
                 xyr.userFcn(xyr, evt);
             end
         end
