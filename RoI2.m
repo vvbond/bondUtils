@@ -246,6 +246,7 @@ classdef RoI2 < handle
             if ishandle(xyr.hline), delete(xyr.hline); end
             % Restore figure keyboard events:
             if ishandle(xyr.hfig)
+                xyr.interactivesOff(xyr.hfig);
                 set(xyr.hfig, 'KeyPressFcn', xyr.old_keyPressCb, 'KeyReleaseFcn', xyr.old_keyReleaseCb);
             end
         end
