@@ -124,33 +124,36 @@ classdef fPoker < iTool
         
         function init(fp)
         % Initialize scaling coefficients.
-        
-           fp.p0 = [fp.himg.XData(1) fp.himg.YData(1)];
+            
+            if isempty(fp.himg.CData)
+                return;
+            end
+            
+            fp.p0 = [fp.himg.XData(1) fp.himg.YData(1)];
 
-           [nRows, nCols] = size(fp.himg.CData);
-           if length(fp.himg.XData) == nCols
+            [nRows, nCols] = size(fp.himg.CData);
+            if length(fp.himg.XData) == nCols
                fp.dx = diff(fp.himg.XData(1:2));
-           elseif length(fp.himg.XData) == 2
+            elseif length(fp.himg.XData) == 2
                % Create xdata vector:
                fp.himg.XData = linspace(fp.himg.XData(1), fp.himg.XData(2), nCols);
                fp.dx = diff(fp.himg.XData(1:2));
-           else
+            else
                warning('fPoker: length of the X-coordinate, %d, vector doesn''t match the number of columns in the image, %d.', length(fp.himg.XData), nCols);
                fp.dx = diff(fp.himg.XData([1,end]) )/( nCols - 1 );
-           end
+            end
 
-           if length(fp.himg.YData) == nRows
+            if length(fp.himg.YData) == nRows
                fp.dy = diff(fp.himg.YData(1:2));
-           elseif length(fp.himg.YData) == 2
+            elseif length(fp.himg.YData) == 2
                % Create ydata vector:
                fp.himg.YData = linspace(fp.himg.YData(1), fp.himg.YData(2), nRows);
                fp.dy = diff(fp.himg.YData(1:2));               
-           else
+            else
                warning('fPoker: length of the Y-coordinate vector, %d, doesn''t match the number of rows in the image, %d.', length(fp.himg.YData), nRows);
                fp.dy = diff(fp.himg.XData([1,end]))/( nRows - 1 );
-           end
-        end
-        
+            end
+        end        
         %% Destructor
         function delete(fp)
             
@@ -349,16 +352,20 @@ classdef fPoker < iTool
             % Find corresponding indices into the image matrix:
             if ishandle(fp.himg)
                 fp.init();
-                fp.pix = round((fp.p-fp.p0)./[fp.dx, fp.dy])+1;
-                % Clip to the image range:
-                fp.pix(fp.pix <= 0) = 1;
-                [m, n] = size(fp.himg.CData);
-                if fp.pix(1) > n, fp.pix(1) = n; end
-                if fp.pix(2) > m, fp.pix(2) = m; end
-                
-                cursorString = { sprintf([fp.format{1} ' (%3d)'], fp.p(1), fp.pix(1))
-                                 sprintf([fp.format{end} ' (%3d)'], fp.p(2), fp.pix(2)) };
-                    
+                if isempty(fp.dx)
+                    fp.pix = [nan nan];
+                    cursorString = { sprintf(fp.format{1},   fp.p(1))
+                                     sprintf(fp.format{end}, fp.p(2))};                    
+                else                    
+                    fp.pix = round((fp.p-fp.p0)./[fp.dx, fp.dy])+1;
+                    % Clip to the image range:
+                    fp.pix(fp.pix <= 0) = 1;
+                    [m, n] = size(fp.himg.CData);
+                    if fp.pix(1) > n, fp.pix(1) = n; end
+                    if fp.pix(2) > m, fp.pix(2) = m; end
+                    cursorString = { sprintf([fp.format{1} ' (%3d)'], fp.p(1), fp.pix(1))
+                                     sprintf([fp.format{end} ' (%3d)'], fp.p(2), fp.pix(2)) };                    
+                end                    
             end
             
             % Display the cursor position sideways of the cursor:
