@@ -14,9 +14,9 @@ function ruler()
     
     if (isempty(hRulerBtn))
         ht = findall(gcf,'Type','uitoolbar');
-        icon = load('rulerIcon1.mat');
-        propIcon = load('ruler_PropIcon.mat');
-        xPlotIcon = load('ruler_xPlotIcon.mat');
+        icon = load(fullfile(fileparts(mfilename('fullpath')),'/icons/rulerIcon_triangular.mat'));
+        propIcon = load(fullfile(fileparts(mfilename('fullpath')),'/icons/ruler_PropIcon.mat'));
+        xPlotIcon = load(fullfile(fileparts(mfilename('fullpath')),'/icons/ruler_xPlotIcon.mat'));
         uipushtool(ht, 'CData',icon.cdata,...
                        'TooltipString','Ruler',....
                        'ClickedCallback', @rulerStart,... 
