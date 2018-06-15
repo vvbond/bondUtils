@@ -2,8 +2,9 @@ classdef FigureToWorkspace < handle
     properties
         hFig
         hBtn
-        nameXData = 't'
-        nameYData = 'x'
+        nameVar   = 'A'
+        nameXData = 'x'
+        nameYData = 'y'
     end
     methods
         %% Constructor
@@ -30,18 +31,30 @@ classdef FigureToWorkspace < handle
         %% Main
         function save_to_workspace(ftws, ~, ~)
             hax = gca;
-            if isempty(hax.Children), return; end
+            % Find line plots:
+            hl = findall(hax, 'Type', 'Line');
+            if ~isempty(hl)
+                hl = hl(end:-1:1);
+                numLines = length(hl);
+                titleStr = sprintf('Save %d lines data', numLines);
+                prompt = {'Variable name: ', 'XData name: ', 'YData name: '};
+                definput = {ftws.nameVar, ftws.nameXData, ftws.nameYData};
+                answer = inputdlg(prompt, titleStr, 1, definput);
+                if isempty(answer), return; end
             
-            prompt = {'XData name', 'YData name'};
-            definput = {ftws.nameXData, ftws.nameYData};
-            answer = inputdlg(prompt, 'Save to workspace', 1, definput);
-            if isempty(answer), return; end
-            
-            ftws.nameXData = answer{1};
-            ftws.nameYData = answer{2};
-            % Save:
-            assignin('base', ftws.nameXData, hax.Children(1).XData);
-            assignin('base', ftws.nameYData, hax.Children(1).YData);
+                ftws.nameVar   = answer{1};
+                ftws.nameXData = answer{2};
+                ftws.nameYData = answer{3};
+                
+                S = struct(ftws.nameXData, [], ftws.nameYData, []);
+                for ii=1:numLines
+                    S(ii).(ftws.nameXData) = hl(ii).XData(:);
+                    S(ii).(ftws.nameYData) = hl(ii).YData(:);
+                end
+                
+                % Save:
+                assignin('base', ftws.nameVar, S);
+            end
         end
     end
 end
