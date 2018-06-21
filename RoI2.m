@@ -913,6 +913,7 @@ classdef RoI2 < handle
             
             % Toggle buttons.
             % Turn off all buttons:
+            xyr.interactivesOff(xyr.hfig);
             if ~isempty(xyr.hbtn) && length(xyr.hbtn) > 1 && ishandle(xyr.hbtn(1))
                 for ii = 1:length(xyr.hbtn)
                     xyr.hbtn(ii).State = 'off';
