@@ -24,7 +24,6 @@ classdef fPoker < iTool
     
     % Image-related properties:
     properties(Hidden = true)
-        hax         % handle to the current axes.
         himg        % handle to the image in the figure.
         p0          % coordinates of the image origin.
         dx          % increment on the x-axis.
