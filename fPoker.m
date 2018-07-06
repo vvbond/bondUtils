@@ -32,6 +32,8 @@ classdef fPoker < iTool
         hYfig       % handle of the Y-monitor figure.
         hXplot      % handles for the x/y line plots.
         hYplot
+        haxX
+        haxY
         hXplot_Y    % handles for position markers in the X/Y moninitor.
         hYplot_X
         hXMonitorTitle
@@ -267,75 +269,102 @@ classdef fPoker < iTool
         
         %% X/Y line plots
         function xmonitor(fp)
+            fp.xplot = [fp.himg.YData(:), fp.himg.CData(:,fp.pix(1))];
+            displayName = sprintf('x = %1.2f;  ix = %1d', fp.p(1), fp.pix(1));
+            
             if isempty(fp.hXplot) || ~ishandle(fp.hXplot)
-                fp.xplot = [fp.himg.YData(:), fp.himg.CData(:,fp.pix(1))];
-                yLabel = get(fp.hax, 'YLabel');
-                
-                figure(fp.hXfig); clf;
-                T = [ 1 0 0 0
-                      0 1 0 0
-                      0 0 1 0
-                      0 1 0 .5 ];
-                fpos = fp.hfig.OuterPosition*T; % shift (translate).
-                
-                figName = sprintf('%s: %s', 'X', fp.hfig.Name);
-                set(fp.hXfig, 'NumberTitle', 'off', 'Name', figName, 'OuterPosition', fpos);
-                fp.hXplot = plot(fp.xplot(:,1), fp.xplot(:,2)); 
-                
-                % Vertical line indicating the cursor position:
-%                 hold on;
-%                 fp.hXplot_Y = plot([1 1]*fp.p(2), ylim, '--');
-%                 hold off;
-                fp.hXMonitorTitle = title(sprintf('%s: x = %1.2f;  ix = %1d', fp.hfig.Name, fp.p(1), fp.pix(1)));
-                xlabel(yLabel.String);
-                box on; grid on;
-                pan xon; zoom xon
-                
-                if exist('Rulerz', 'file'), Rulerz('x'); end
-                if exist('FigureToWorkspace', 'file'), FigureToWorkspace; end
-                
+                if ~ishandle(fp.hXfig)
+                    figure(fp.hXfig); clf;
+                    T = [ 1 0 0 0
+                          0 1 0 0
+                          0 0 1 0
+                          0 1 0 .5 ];
+                    fpos = fp.hfig.OuterPosition*T; % shift (translate).
+                    figName = sprintf('%s: %s', 'X', fp.hfig.Name);
+                    set(fp.hXfig, 'NumberTitle', 'off', 'Name', figName, 'OuterPosition', fpos);
+                    yLabel = get(fp.hax, 'YLabel');                
+                    xlabel(yLabel.String);
+                    fp.hXplot = plot(fp.xplot(:,1), fp.xplot(:,2), 'DisplayName', displayName); 
+                    fp.haxX = gca;
+                    % iTools:
+                    if exist('Rulerz', 'file'), Rulerz('x'); end
+                    if exist('FigureToWorkspace', 'file'), FigureToWorkspace; end
+                    % Hold on button:
+                    ht = findall(fp.hXfig,'Type','uitoolbar');
+                    pinIcon = load(fullfile(fileparts(mfilename('fullpath')),'/icons/pinIcon.mat'));
+                    uitoggletool(ht(1), 'OnCallback',  @(src,evt) hold(gca, 'on'),...
+                                        'OffCallback', @(src,evt) hold(gca, 'off'),...
+                                        'CData', pinIcon.cdata, ...
+                                        'TooltipString', 'Hold on/off', ...
+                                        'Tag', 'pinBtn',... 
+                                        'Separator', 'on');
+                else
+                    fp.hXplot = plot(fp.haxX, fp.xplot(:,1), fp.xplot(:,2), 'DisplayName', displayName); 
+                end
+                box(fp.haxX, 'on'); grid(fp.haxX, 'on'); legend(fp.haxX, 'show');
+                fp.hXMonitorTitle = title(sprintf('%s: x = %1.2f;  ix = %1d', fp.hfig.Name, fp.p(1), fp.pix(1)));                
+                    % Vertical line indicating the cursor position:
+    %                 hold on;
+    %                 fp.hXplot_Y = plot([1 1]*fp.p(2), ylim, '--');
+    %                 hold off;
                 % Return focus to the main figure:
                 figure(fp.hfig);
             else
-                fp.xplot = [fp.himg.YData(:), fp.himg.CData(:,fp.pix(1))];
-                set(fp.hXplot, 'xdata', fp.xplot(:,1), 'ydata', fp.xplot(:,2) );
+                set(fp.hXplot, 'xdata', fp.xplot(:,1), 'ydata', fp.xplot(:,2), 'DisplayName', displayName);
 %                 set(fp.hXplot_Y, 'xdata', [1 1]*fp.p(2), 'ydata', arange(fp.himg.CData(:,fp.pix(1))));
                 set(fp.hXMonitorTitle, 'String', sprintf('x = %1.2f;  ix = %1d', fp.p(1), fp.pix(1)));
             end
         end
         
         function ymonitor(fp)
+            fp.yplot = [fp.himg.XData(:), fp.himg.CData(fp.pix(2), :)'];
+            displayName = sprintf('y = %1.2f;  ix = %1d', fp.p(2), fp.pix(2));
+            
             if isempty(fp.hYplot) || ~ishandle(fp.hYplot)
-                fp.yplot = [fp.himg.XData(:), fp.himg.CData(fp.pix(2), :)'];
-                yLabel = get(fp.hax, 'XLabel');
-                
-                figure(fp.hYfig); clf;
-                T = [ 1 0 0 0
-                      0 1 0 0
-                      0 0 1 0
-                      0 1 0 .5 ];
-                fpos = fp.hfig.OuterPosition*T; % shift (translate).
-                
-                figName = sprintf('%s: %s', 'Y', fp.hfig.Name);
-                set(fp.hYfig, 'NumberTitle', 'off', 'Name', figName, 'OuterPosition', fpos);
-                fp.hYplot = plot(fp.yplot(:,1), fp.yplot(:,2)); 
+                if ~ishandle(fp.hYfig)
+                    figure(fp.hYfig); clf;
+                    T = [ 1 0 0 0
+                          0 1 0 0
+                          0 0 1 0
+                          0 1 0 .5 ];
+                    fpos = fp.hfig.OuterPosition*T; % shift (translate).
+
+                    figName = sprintf('%s: %s', 'Y', fp.hfig.Name);
+                    set(fp.hYfig, 'NumberTitle', 'off', 'Name', figName, 'OuterPosition', fpos);
+                    yLabel = get(fp.hax, 'XLabel');
+                    xlabel(yLabel.String);
+                    fp.hYplot = plot(fp.yplot(:,1), fp.yplot(:,2),...
+                        'DisplayName', displayName);
+                    fp.haxY = gca;
+                    % iTools:
+                    if exist('Rulerz', 'file'), Rulerz('x'); end
+                    if exist('FigureToWorkspace', 'file'), FigureToWorkspace; end
+                    % Hold on button:
+                    ht = findall(fp.hYfig,'Type','uitoolbar');
+                    pinIcon = load(fullfile(fileparts(mfilename('fullpath')),'/icons/pinIcon.mat'));
+                    uitoggletool(ht(1), 'OnCallback',  @(src,evt) hold(gca, 'on'),...
+                                        'OffCallback', @(src,evt) hold(gca, 'off'),...
+                                        'CData', pinIcon.cdata, ...
+                                        'TooltipString', 'Hold on/off', ...
+                                        'Tag', 'pinBtn',... 
+                                        'Separator', 'on');
+                else
+                    fp.hYplot = plot(fp.haxY, fp.yplot(:,1), fp.yplot(:,2),... 
+                                     'DisplayName', displayName);
+                end
+                box(fp.haxY, 'on'); grid(fp.haxY, 'on'); legend(fp.haxY, 'show');
 %                 hold on;
 %                 fp.hYplot_X = plot([1 1]*fp.p(2), ylim, '--');
 %                 hold off;
                 fp.hYMonitorTitle = title(sprintf('%s: y = %1.2f;  ix = %1d', fp.hfig.Name, fp.p(2), fp.pix(2)));
-                xlabel(yLabel.String);
-                box on; grid on;
-                
-                if exist('Rulerz', 'file'), Rulerz('x'); end
-                if exist('FigureToWorkspace', 'file'), FigureToWorkspace; end
-                
+                                
                 % Return focus to the main figure:
                 figure(fp.hfig);
             else
-                fp.yplot = [fp.himg.XData(:), fp.himg.CData(fp.pix(2), :)'];
-                set(fp.hYplot, 'xdata', fp.yplot(:,1), 'ydata', fp.yplot(:,2));
+                set(fp.hYplot, 'xdata', fp.yplot(:,1), 'ydata', fp.yplot(:,2),...
+                               'DisplayName', displayName);
 %                 set(fp.hYplot_X, 'xdata', [1 1]*fp.p(2), 'ydata', arange(fp.himg.CData(:,fp.pix(1))));
-                set(fp.hYMonitorTitle, 'String', sprintf('%s: y = %1.2f;  ix = %1d', fp.hfig.Name, fp.p(2), fp.pix(2)));
+                set(fp.hYMonitorTitle, 'String', sprintf('y = %1.2f;  ix = %1d', fp.p(2), fp.pix(2)));
             end
         end
     end
@@ -417,10 +446,16 @@ classdef fPoker < iTool
 
                     if fp.xMonitorOnOff
                         fp.xMonitorRunning  = mod(fp.xMonitorRunning + 1, 2); % flip the switch.
+                        if ~isempty(fp.haxX) && ishandle(fp.haxX) && strcmpi(fp.haxX.NextPlot, 'add')
+                            fp.hXplot = -1;
+                        end
                     end
 
                     if fp.yMonitorOnOff
                         fp.yMonitorRunning  = mod(fp.yMonitorRunning + 1, 2); % flip the switch.
+                        if ~isempty(fp.haxY) && ishandle(fp.haxY) && strcmpi(fp.haxY.NextPlot, 'add')
+                            fp.hYplot = -1;
+                        end
                     end
                     
                     % Execute user-defined button up functions:
