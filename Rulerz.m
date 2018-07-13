@@ -27,7 +27,8 @@ classdef Rulerz < iTool
     events
         axisChange
     end
-    
+
+%% Methods    
     methods
         %% Constructor
         function rlz = Rulerz(raxis)
@@ -136,6 +137,12 @@ classdef Rulerz < iTool
             rlz.interactivesOff(rlz.hfig);
             set(rlz.hLines, 'ButtonDownFcn', @(src,evt) lbdcb(rlz, src, evt));
             set(rlz.hax,    'ButtonDownFcn', @(src,evt) abdcb(rlz, src, evt));
+            
+            % Disable hit test for images:
+            himgs = findall(rlz.hax, 'type', 'Image');
+            for himg = himgs(:)'
+                himg.HitTest = 'off';
+            end
         end
         
         %% Rulerz OFF:
@@ -203,7 +210,7 @@ classdef Rulerz < iTool
 %                         set(rlz.hLines(rlz.lineIx), 'YData', [1 1]*rlz.yy(ix));
                 end
                 % Update info box:
-                set(rlz.hInfoBox, 'String', rlz.infoString() );
+%                 set(rlz.hInfoBox, 'String', rlz.infoString() );
                 
                 % Execute external mouse movement functions:
                 for ii=1:length(rlz.bmfun)
@@ -260,7 +267,7 @@ classdef Rulerz < iTool
             end
         end
         
-        %% Listener callback for the axisChange event
+        %% Listeners
         function axisChangeEvt(rlz, ~, ~)   
             % Turn off the current ruler:
             if ishandle(rlz.hBtn)
@@ -286,7 +293,9 @@ classdef Rulerz < iTool
             end
             if ishandle(rlz.hLines(2)) && isvalid(rlz.hLines(2))
                 set(rlz.hLines(2), 'XData', [1 1]*rlz.xx(2)); 
-            end 
+            end
+            % Update info box:
+            set(rlz.hInfoBox, 'String', rlz.infoString() );            
         end
 
         function yy_PostSet_cb(rlz, ~, ~)
@@ -307,6 +316,8 @@ classdef Rulerz < iTool
                     end
                 end
             end            
+            % Update info box:
+            set(rlz.hInfoBox, 'String', rlz.infoString() );            
         end
     end    
 end
