@@ -171,6 +171,8 @@ classdef fPoker < iTool
             fp.interactivesOff(fp.hfig);
             
             fp.hax = gca;
+            % If axes has an image, grab its handle:
+            fp.himg = findobj(fp.hax, 'type', 'image');
             
             % Store existing interaction callbacks:
             fp.oldWindowButtonMotionFcn = get(fp.hfig,'WindowButtonMotionFcn');
