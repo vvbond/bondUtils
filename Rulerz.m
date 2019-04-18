@@ -39,8 +39,16 @@ classdef Rulerz < iTool
             end
             
             rlz.axis = raxis;
-            % Add a toolbar toggle button:
+            
+            % Check if the Rulerz toggle tool button already exists:
             rlz.hfig = gcf;
+            rlzBtn = findall(rlz.hfig, 'Tag', 'rulerz');
+            if ~isempty(rlzBtn)
+                rlz = rlzBtn.UserData;
+                return;
+            end
+            
+            % Add a toolbar toggle button:
             ht = findall(rlz.hfig,'Type','uitoolbar');
             switch raxis
                 case {1, 'x'}
@@ -56,7 +64,8 @@ classdef Rulerz < iTool
                                             'CData', rlzIcon.cdata, ...
                                             'TooltipString', 'X-/Y- rulers', ...
                                             'Tag', 'rulerz',... 
-                                            'Separator', 'on');
+                                            'Separator', 'on',...
+                                            'UserData', rlz);
             rlz.lColor = [.5 .5 .5];
             rlz.lStyle = '--';
             rlz.lWidth = 2;
@@ -151,7 +160,9 @@ classdef Rulerz < iTool
             delete(findall(gcf, 'tag', 'rulersInfo'));
             
             % Restore callbacks:
-            set(rlz.hax, 'ButtonDownFcn', rlz.cache.abdcb);
+            if ishandle(rlz.hax) && isvalid(rlz.hax)
+                set(rlz.hax, 'ButtonDownFcn', rlz.cache.abdcb);
+            end
         end
         
         %% Interaction callbacks:
@@ -210,16 +221,16 @@ classdef Rulerz < iTool
 %                         set(rlz.hLines(rlz.lineIx), 'YData', [1 1]*rlz.yy(ix));
                 end
                 % Update info box:
-%                 set(rlz.hInfoBox, 'String', rlz.infoString() );
-                
-                % Execute external mouse movement functions:
-                for ii=1:length(rlz.bmfun)
-                    rlz.bmfun{ii}(rlz);
-                end
+%                 set(rlz.hInfoBox, 'String', rlz.infoString() );                
             else
                 dp = rlz.currentPoint - rlz.clickPoint;
                 rlz.xx = rlz.cache.xx + dp(1);
                 rlz.yy = rlz.cache.yy + dp(2);
+            end
+            
+            % Execute external mouse movement functions:
+            for ii=1:length(rlz.bmfun)
+                rlz.bmfun{ii}(rlz);
             end
         end
 
