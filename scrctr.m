@@ -9,13 +9,14 @@ function p = scrctr(w, h)
 %   h - height
 %
 % OUTPUT:
-% p - Position of the screen center point or centered rectangle.
+% p - 2-vector specifying the position of the screen center point or 
+%     4-vector definging the postion of the centered rectangle of given width and height.
 %
 % Examples:
 %  scrctr();
 %  [p]=scrctr();
 %
-% See also: <other funame>.
+% See also: scrh(), scrw().
  
 %% Created: 14-Dec-2021 17:55:03
 %% (c) Vladimir Bondarenko, http://www.mathworks.co.uk/matlabcentral/fileexchange/authors/52876

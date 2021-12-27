@@ -14,7 +14,7 @@ function l = radon_length(theta, xp, sz)
             0 sz(1)-1 ];
     Pyy = [ 0 sz(2)-1 ;
            (shift - cos(alpha)*[0 sz(2)-1])/sin(alpha) ];
-    P = [ Pxx(:, inarange(Pxx(1,:), [0 sz(2)-1])) Pyy(:, inarange(Pyy(2,:), [0 sz(1)-1])) ];
+    P = [ Pxx(:, within(Pxx(1,:), [0 sz(2)-1])) Pyy(:, within(Pyy(2,:), [0 sz(1)-1])) ];
     if ~isempty(P)
         l = norm(diff(P,[],2));
         l = max(l, 1);
