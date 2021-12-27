@@ -1,5 +1,5 @@
 function yn = inarange(x, rng, rngType)
-% Indicate if the a variable is within a specified range.
+% Indicate if the a variable is within a specified interval.
 %
 % Usage: yn = inarange(x, rng)
 %

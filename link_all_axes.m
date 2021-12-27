@@ -1,7 +1,7 @@
-function linkTheAxes(axName)
+function link_all_axes(axName)
 % Link all the axes in figures.
 %
-% Usage: linkTheAxes(axName)
+% Usage: link_all_axes(axName)
 %
 % INPUT:
 % axName - string, 'x', 'y', 'xy' (default), or 'off'. Indicates which axis to link.
@@ -10,7 +10,7 @@ function linkTheAxes(axName)
 %  None.
 %
 % Examples:
-%  linkTheAxes(axName);
+%  link_all_axes(axName);
 %
 % See also: linkaxes, gaa, delfigs.
  
