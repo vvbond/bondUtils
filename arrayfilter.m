@@ -19,7 +19,11 @@ function B = arrayfilter(pred, A)
 %% Created: 15-Dec-2021 18:16:01
 %% (c) Vladimir Bondarenko, Albus Health.
 
-ind = arrayfun(pred, A);
+if iscell(A)
+    ind = cellfun(pred, A);
+else
+    ind = arrayfun(pred, A);
+end
 if ~any(ind)
     B = [];
 else

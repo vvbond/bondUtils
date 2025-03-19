@@ -1,7 +1,7 @@
 function ds = dirrec(dirname)
 % Recursive directory listing.
 %
-% Usage: ds = recdir(dirname)
+% Usage: ds = dirrec(dirname)
 %
 % INPUT:
 % dirname - input directory.
@@ -10,8 +10,8 @@ function ds = dirrec(dirname)
 % ds - directory structure.
 %
 % Examples:
-%  recdir(dirname);
-%  [ds]=recdir(dirname);
+%  dirrec(dirname);
+%  [ds]=dirrec(dirname);
 %
 % See also: <other funame>.
  
@@ -23,11 +23,6 @@ ds(contains({ds.name}, regexpPattern('^\.'))) = [];
 if isempty(ds), return; end
 ds(1).data = [];
 
-subdir_ind = [ds.isdir];
-if isempty(subdir_ind), return; end
-
-for ix = find(subdir_ind)
-    name = ds(ix).name;
-    folder = ds(ix).folder;
-    ds(ix).data = dirrec(fullfile(folder, name));
+for ix = find([ds.isdir])
+    ds(ix).data = dirrec(filename(ds(ix)));
 end
